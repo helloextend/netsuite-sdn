@@ -1,0 +1,7 @@
+<manifest projecttype="SUITEAPP">
+  <publisherid>com.extend</publisherid>
+  <projectid>extendproductprotection</projectid>
+  <projectname>Extend Product Protection</projectname>
+  <projectversion>1.0.0</projectversion>
+  <frameworkversion>1.0</frameworkversion>
+</manifest>
