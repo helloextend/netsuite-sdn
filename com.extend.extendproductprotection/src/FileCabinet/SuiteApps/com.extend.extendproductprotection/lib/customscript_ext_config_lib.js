@@ -18,9 +18,11 @@
             var SB_API_KEY; 
             var SB_API_VERSION;
             var SB_EMAIL;
+            var SB_REF_ID;
             var STORE_ID;
             var API_KEY;
             var API_VERSION;
+            var REF_ID;
             
             var customrecord_ext_configurationSearchObj = search.create({
                 type: "customrecord_ext_configuration",
@@ -31,7 +33,9 @@
                    search.createColumn({name: "custrecord_ext_api_key", label: "API Key"}),
                    search.createColumn({name: "custrecord_ext_api_version", label: "API Version"}),
                    search.createColumn({name: "custrecord_ext_demo_email", label: "Email"}),
-                   search.createColumn({name: "custrecord_ext_store_id", label: "Store ID"})
+                   search.createColumn({name: "custrecord_ext_store_id", label: "Store ID"}),
+                   search.createColumn({name: "custrecord_ext_ref_id", label: "Ref ID"}),
+                   search.createColumn({name: "custrecord1392", label: "Ref ID scriptid"})
                 ]
              });
              var searchResultCount = customrecord_ext_configurationSearchObj.runPaged().count;
@@ -39,13 +43,17 @@
                 var stEnvironment = result.getValue({ name: 'custrecord_ext_environment' });
                 if(stEnvironment == objExtendEnvironment.SANDBOX){
                     SB_STORE_ID  = result.getValue({ name: 'custrecord_ext_store_id' }); 
-                    SB_API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });; 
-                    SB_API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });;
-                    SB_EMAIL  = result.getValue({ name: 'custrecord_ext_demo_email' });;
+                    SB_API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });
+                    SB_API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
+                    SB_EMAIL  = result.getValue({ name: 'custrecord_ext_demo_email' });
+                    SB_REF_ID  = result.getValue({ name: 'custrecord_ext_ref_id' });
+
                 }else{
-                    STORE_ID  = result.getValue({ name: 'custrecord_ext_store_id' });;
-                    API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });;
-                    API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });;
+                    STORE_ID  = result.getValue({ name: 'custrecord_ext_store_id' });
+                    API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });
+                    API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
+                    REF_ID  = result.getValue({ name: 'custrecord_ext_ref_id' });
+
                 }
 
                 return true;
@@ -57,13 +65,15 @@
                 key: SB_API_KEY,
                 domain: 'https://api-demo.helloextend.com',
                 version: SB_API_VERSION,
-                email: SB_EMAIL //IMPORTATN: SB and Testing environemnts requires manual assignment of a test email
+                email: SB_EMAIL, //IMPORTATN: SB and Testing environemnts requires manual assignment of a test email
+                refId: SB_REF_ID
             };
             var objProd = {
                 storeId: STORE_ID,
                 key: API_KEY,
                 domain: 'https://api.helloextend.com',
-                version: API_VERSION
+                version: API_VERSION,
+                refId: REF_ID
 
             };
 

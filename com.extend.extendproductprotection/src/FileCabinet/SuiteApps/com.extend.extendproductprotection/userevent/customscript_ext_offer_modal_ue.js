@@ -18,7 +18,7 @@
         {
             const recCurrent = context.newRecord;
             const objForm = context.form;
-	    objForm.clientScriptModulePath = '../client/customscript_ext_so_offer_controller_cs.js';
+	        objForm.clientScriptModulePath = '../client/customscript_ext_so_offer_controller_cs.js';
             objForm.addButton({
                 id : 'custpage_open_suitelet',
                 label: 'Add Protection Plan',

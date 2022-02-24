@@ -11,7 +11,7 @@
  *@NModuleScope Public
 */
 define(['N/url',
-'../libs/customscript_ext_util'
+'../lib/customscript_ext_util'
 ], 
 function(url, EXTEND_UTIL){
     var exports = {};
@@ -89,6 +89,7 @@ function(url, EXTEND_UTIL){
         var stItemList = objCurrentRec.getValue({fieldId: 'custpage_item_list'});
         var stItemQty;
         var stLineNum;
+        var stItemRefId;
 
         if(!EXTEND_UTIL.objectIsEmpty(stItemId)){
             var arrItemList = JSON.parse(stItemList);
@@ -96,6 +97,7 @@ function(url, EXTEND_UTIL){
             var objItem = _searchArray(stItemId, 'id', arrItemList);
             stItemQty = objItem.qty;
             stLineNum = objItem.line;
+            stItemRefId = objItem.refId;
         }
         
         var URL = url.resolveScript({
@@ -106,7 +108,8 @@ function(url, EXTEND_UTIL){
                   'itemtext' : stItemName,
                   'arrItemid': stItemList,
                   'line' : stLineNum,
-                  'quantity' : stItemQty
+                  'quantity' : stItemQty,
+                  'refid': stItemRefId
                 }
         });
         

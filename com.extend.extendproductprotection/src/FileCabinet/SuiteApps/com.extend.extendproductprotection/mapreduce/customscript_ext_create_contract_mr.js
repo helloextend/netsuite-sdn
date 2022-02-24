@@ -15,7 +15,7 @@ define([
     'N/runtime',
     'N/record',
     'N/search',
-    '../libs/customscript_ext_util'
+    '../lib/customscript_ext_util'
 ],
     function (runtime, record, search, EXTEND_UTIL) {
         var exports = {};

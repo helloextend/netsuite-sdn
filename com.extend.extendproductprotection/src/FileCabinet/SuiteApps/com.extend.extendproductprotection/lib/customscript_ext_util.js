@@ -7,7 +7,7 @@
     'N/search',
     'N/record',
     'N/error',
-    '../libs/customscript_ext_api_lib',
+    '../lib/customscript_ext_api_lib',
 ],
     function (search, record, error, EXTEND_API) {
         var exports = {};

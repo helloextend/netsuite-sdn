@@ -5,7 +5,7 @@
  */
  define([
   'N/https',
-  '../libs/customscript_ext_config_lib'
+  '../lib/customscript_ext_config_lib'
 ],
 
   //todo add additional extend API calls
@@ -29,7 +29,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
           body: JSON.stringify(arrProducts),
         });
@@ -55,7 +55,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
           body: JSON.stringify(objProductDetails),
         });
@@ -79,7 +79,7 @@
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
         });
         if (response) {
@@ -102,7 +102,7 @@
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
         });
         if (response) {
@@ -127,7 +127,7 @@
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
         });
         if (response) {
@@ -155,7 +155,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
           body: JSON.stringify(objContractDetails),
         });
@@ -180,7 +180,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
           body: JSON.stringify(objContractDetails),
         });
@@ -205,7 +205,7 @@
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
         });
         if (response) {
@@ -230,7 +230,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
           body: JSON.stringify(objLeadDetails),
         });
@@ -255,7 +255,7 @@
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json:version=' + config.version
+            'Accept': 'application/json;version=' + config.version
           },
         });
         if (response) {

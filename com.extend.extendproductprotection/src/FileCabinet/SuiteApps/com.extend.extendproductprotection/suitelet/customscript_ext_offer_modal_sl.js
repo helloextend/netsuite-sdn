@@ -13,12 +13,12 @@
  *@NScriptType Suitelet
  *@NModuleScope Public
  */
- define([
+define([
     'N/ui/serverWidget',
     'N/runtime',
     'N/http',
     'N/error',
-    '../libs/customscript_ext_api_lib'
+    '../lib/customscript_ext_api_lib'
 ],
     function (ui, runtime, http, error, api) {
 
@@ -165,7 +165,8 @@
 
                 var arrItemList = JSON.parse(context.request.parameters.arrItemid);
                 var stItemInternalId = context.request.parameters.itemid;
-                var stItemRefId = context.request.parameters.itemtext;
+                var stItemRefId = context.request.parameters.refid;
+                log.debug('stItemRefId', stItemRefId);
 
                 // Create the form
                 var objForm = ui.createForm({
@@ -205,6 +206,19 @@
                 });
                 if (context.request.parameters.itemtext) {
                     objItemNameField.defaultValue = context.request.parameters.itemtext;
+
+                }
+                //Hidden field of item refid
+                var objItemRefIdField = objForm.addField({
+                    id: 'custpage_item_ref_id',
+                    type: ui.FieldType.TEXT,
+                    label: 'Item Ref ID'
+                });
+                objItemNameField.updateDisplayType({
+                    displayType: ui.FieldDisplayType.HIDDEN
+                });
+                if (context.request.parameters.refid) {
+                    objItemRefIdField.defaultValue = context.request.parameters.refid;
 
                 }
                 //Hidden field of item name
