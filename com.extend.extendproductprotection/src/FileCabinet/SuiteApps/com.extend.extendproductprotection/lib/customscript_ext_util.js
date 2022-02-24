@@ -8,8 +8,10 @@
     'N/record',
     'N/error',
     '../lib/customscript_ext_api_lib',
+    '../lib/customscript_ext_config_lib'
+
 ],
-    function (search, record, error, EXTEND_API) {
+    function (search, record, error, EXTEND_API, EXTEND_CONFIG) {
         var exports = {};
    exports.getCONSTANTS = function(){
      const CONSTANTS = {};
@@ -111,7 +113,30 @@
             }
             return objExtendData;
         };
+        exports.getItemRefId = function(stItemId){
+            log.debug('config', EXTEND_CONFIG.getConfig());
+            var refIdValue = EXTEND_CONFIG.getConfig().refId;
+            log.debug('refIdValue', refIdValue);
+            var stItemRefId = stItemId;
+            if (refIdValue) {
+                // Lookup to item to see if it is eligible for warranty offers
+                var arrItemLookup = search.lookupFields({
+                    type: 'item',
+                    id: stItemId,
+                    columns: refIdValue
+                });
+                log.debug('arrItemLookup', arrItemLookup);
 
+                for (var prop in arrItemLookup) {
+                    var stItemRefId = arrItemLookup[prop]
+                    log.debug('arrItemLookup[prop]', typeof (arrItemLookup[prop]) + ', ' + arrItemLookup[prop]);
+
+                    break;
+                }
+                log.debug('stRefId', typeof (stItemRefId) + ', ' + stItemRefId);
+            }
+            return stItemRefId;
+        }
         //get Transaction Date required for contract create
         exports.getTransactionDate = function (stDate) {
             var stTimeDate = new Date(stDate);
@@ -167,16 +192,25 @@
 
             // Date is a string and we need to format for extend
             const stTranDate = new Date(objValues.tran_date);
+            log.debug('EXTEND UTIL stTranDate:', stTranDate);
+            log.debug('EXTEND UTIL objValues.tran_date:', objValues.tran_date);
+
+            //get product refId
+            log.debug('EXTEND UTIL objValues.itemId:', objValues.itemId);
+            objValues.refId = exports.getItemRefId(objValues.itemId);
+            log.debug('EXTEND UTIL objValues.refId:', objValues.refId);
+
+
             var objJSON = {
                 'transactionId': objValues.id,
                 'transactionDate': objValues.tran_date,
-                'transactionTotal':  objValues.total_amount * 100,
-/*
+//                'transactionTotal':  objValues.total_amount * 100,
+
                 'transactionTotal': {
                     'currencyCode': objValues.currency,
                     'amount': objValues.total_amount * 100
                 },
-*/
+
                 'currency': objValues.currency,
                 'poNumber': objValues.order_number,
                 'customer': {
@@ -201,24 +235,24 @@
                     }
                 },
                 'product': {
-                    'referenceId': objValues.extend_sku,
-                     'purchasePrice': objValues.purchase_price * 100,
-/*
+                    'referenceId': objValues.refId,
+ //                   'purchasePrice': objValues.purchase_price * 100,
+
                     'purchasePrice': {
                         'currencyCode': objValues.currency,
                         'amount': objValues.purchase_price * 100,
                     }
-                    */
+                    
                     // 'serialNumber' : objValues.serial_number
                 },
                 'plan': {
-                     'purchasePrice':  objValues.plan_price * 100,
-/*
+ //                    'purchasePrice':  objValues.plan_price * 100,
+
                     'purchasePrice': {
                         'currencyCode': objValues.currency,
                         'amount': objValues.plan_price * 100
                     },
-*/
+
                     'planId': objValues.extend_plan_id
                 }
             };
