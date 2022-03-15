@@ -14,11 +14,27 @@
     // Add button for Suitelet
     var exports = {};
     exports.beforeLoad = function(context){
+
+
+        var objEventRouter = {
+            'create': _addButton,
+            'edit': _addButton
+        }
+
+        if (typeof objEventRouter[context.type] !== 'function') {
+            return true;
+        }
+
+        objEventRouter[context.type](context);
+        return true;
+       
+    }
+    function _addButton(context){
         try
         {
             const recCurrent = context.newRecord;
             const objForm = context.form;
-	        objForm.clientScriptModulePath = '../client/customscript_ext_so_offer_controller_cs.js';
+            objForm.clientScriptModulePath = '../client/customscript_ext_so_offer_controller_cs.js';
             objForm.addButton({
                 id : 'custpage_open_suitelet',
                 label: 'Add Protection Plan',
@@ -29,6 +45,7 @@
             log.error('beforeLoad_addButton', error.message);
         }
     }
+    
     return exports;
 
     

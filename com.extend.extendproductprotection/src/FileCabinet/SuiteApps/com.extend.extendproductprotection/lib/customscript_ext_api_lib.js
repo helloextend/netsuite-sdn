@@ -20,7 +20,6 @@
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products/post
      */
     exports.createProduct = function (arrProducts, bIsBatch, bIsUpsert) {
-      // log.debug('Extend Product Details', objProductDetails);
       var config = extendConfig.getConfig();
       try {
         var response = https.post({

@@ -35,7 +35,6 @@
                    search.createColumn({name: "custrecord_ext_demo_email", label: "Email"}),
                    search.createColumn({name: "custrecord_ext_store_id", label: "Store ID"}),
                    search.createColumn({name: "custrecord_ext_ref_id", label: "Ref ID"}),
-                   search.createColumn({name: "custrecord1392", label: "Ref ID scriptid"})
                 ]
              });
              var searchResultCount = customrecord_ext_configurationSearchObj.runPaged().count;

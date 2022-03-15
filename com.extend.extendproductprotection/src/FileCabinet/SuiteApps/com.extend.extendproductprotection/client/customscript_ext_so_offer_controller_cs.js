@@ -14,12 +14,13 @@
 */
 define([
     'N/url',
+    'N/runtime',
     'N/search',
     'N/currentRecord',
     '../lib/customscript_ext_util',
     '../lib/customscript_ext_config_lib'
 ],
-    function (url, search, currentRecord, EXTEND_UTIL, EXTEND_CONFIG) {
+    function (url, runtime, search, currentRecord, EXTEND_UTIL, EXTEND_CONFIG) {
         var exports = {};
         exports.pageInit = function () {
 
@@ -34,8 +35,11 @@ define([
             if (typeof objEventRouter[context.sublistId] !== 'function') {
                 return true;
             }
+            try {
+                objEventRouter[context.sublistId](context);
+            } catch (e) {
 
-            objEventRouter[context.sublistId](context);
+            }
             return true;
         };
         function _handleItemInput(context) {
@@ -44,18 +48,21 @@ define([
             log.debug('Sublist', context.currentRecord.getSublist({ sublistId: context.sublistId }));
             log.debug('config', EXTEND_CONFIG.getConfig());
             var refIdValue = EXTEND_CONFIG.getConfig().refId;
-            log.debug('refIdValue', refIdValue);
 
             var objCurrentRecord = context.currentRecord;
 
             var arrItemList = [];
+            var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
 
             var stItemId = objCurrentRecord.getCurrentSublistValue({
                 sublistId: context.sublistId,
                 fieldId: 'item'
             });
+            if (stExtendItem == stItemId) {
+                return;
+            }
+
             var stItemRefId = stItemId;
-            //        log.debug('stItemId', stItemId);
             var stLineNum = objCurrentRecord.getCurrentSublistIndex({
                 sublistId: context.sublistId
             });
@@ -74,15 +81,10 @@ define([
                     id: stItemId,
                     columns: refIdValue
                 });
-                log.debug('arrItemLookup', arrItemLookup);
-
                 for (var prop in arrItemLookup) {
-                    var stItemRefId = arrItemLookup[prop]
-                    log.debug('arrItemLookup[prop]', typeof (arrItemLookup[prop]) + ', ' + arrItemLookup[prop]);
-
+                    var stItemRefId = arrItemLookup[prop];
                     break;
                 }
-                log.debug('stRefId', typeof (stItemRefId) + ', ' + stItemRefId);
             }
 
 
@@ -114,6 +116,11 @@ define([
                 sublistId: stSublistId
             });
             log.debug('linecount', linecount);
+            log.debug('config', EXTEND_CONFIG.getConfig());
+            var refIdValue = EXTEND_CONFIG.getConfig().refId;
+            //get extend item
+            var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+
             //loop item sublist or retrieve for single line item if validate line function
             for (var i = 0; i < linecount; i++) {
                 var stItemId = objCurrentRecord.getSublistValue({
@@ -121,6 +128,8 @@ define([
                     fieldId: 'item',
                     line: i
                 });
+
+                var stItemRefId = stItemId;
                 var stItemName = objCurrentRecord.getSublistText({
                     sublistId: stSublistId,
                     fieldId: 'item',
@@ -131,6 +140,20 @@ define([
                     fieldId: 'quantity',
                     line: i
                 });
+                if (refIdValue) {
+                    // Lookup to item to see if it is eligible for warranty offers
+                    var arrItemLookup = search.lookupFields({
+                        type: 'item',
+                        id: stItemId,
+                        columns: refIdValue
+                    });
+
+                    for (var prop in arrItemLookup) {
+                        var stItemRefId = arrItemLookup[prop];
+                        break;
+                    }
+                }
+
                 var objItem = {};
                 objItem.id = stItemId;
                 objItem.name = stItemName;
@@ -139,7 +162,9 @@ define([
                 objItem.refId = stItemRefId;
                 //log.debug('objItem', objItem);
                 //push to array
-                arrItemList.push(objItem);
+                if (stExtendItem != stItemId) {
+                    arrItemList.push(objItem);
+                }
             }
             var stArrayItemList = JSON.stringify(arrItemList);
             log.debug('stArrayItemList', stArrayItemList);
@@ -166,5 +191,4 @@ define([
         }
         return exports;
 
-        ;
     });

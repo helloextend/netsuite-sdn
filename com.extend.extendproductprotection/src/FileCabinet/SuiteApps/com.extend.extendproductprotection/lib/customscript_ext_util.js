@@ -12,19 +12,7 @@
 
 ],
     function (search, record, error, EXTEND_API, EXTEND_CONFIG) {
-        var exports = {};
-   exports.getCONSTANTS = function(){
-     const CONSTANTS = {};
-         CONSTANTS.objWarrantyStatus = {
-            notSynced: 1,
-            synced: 2,
-            warrantable: 3,
-            nonWarrantable: 4,
-            syncError: 5
-        };
-     return CONSTANTS;
-   }
-     
+        var exports = {};     
         /**
          * Contract Functions
          */
@@ -114,9 +102,7 @@
             return objExtendData;
         };
         exports.getItemRefId = function(stItemId){
-            log.debug('config', EXTEND_CONFIG.getConfig());
             var refIdValue = EXTEND_CONFIG.getConfig().refId;
-            log.debug('refIdValue', refIdValue);
             var stItemRefId = stItemId;
             if (refIdValue) {
                 // Lookup to item to see if it is eligible for warranty offers
@@ -125,15 +111,10 @@
                     id: stItemId,
                     columns: refIdValue
                 });
-                log.debug('arrItemLookup', arrItemLookup);
-
                 for (var prop in arrItemLookup) {
                     var stItemRefId = arrItemLookup[prop]
-                    log.debug('arrItemLookup[prop]', typeof (arrItemLookup[prop]) + ', ' + arrItemLookup[prop]);
-
                     break;
                 }
-                log.debug('stRefId', typeof (stItemRefId) + ', ' + stItemRefId);
             }
             return stItemRefId;
         }
@@ -145,7 +126,7 @@
         //get Current Date in epoch format required for contract create
         exports.getepochDate = function () {
             var stTimeDate = new Date();
-            return stTimeDate.getTime() / 1000;
+            return stTimeDate.getTime();
         };
         //get Customer Info required for contract create
         exports.getCustomerInfo = function (stCustomerId) {
@@ -192,15 +173,9 @@
 
             // Date is a string and we need to format for extend
             const stTranDate = new Date(objValues.tran_date);
-            log.debug('EXTEND UTIL stTranDate:', stTranDate);
-            log.debug('EXTEND UTIL objValues.tran_date:', objValues.tran_date);
 
             //get product refId
-            log.debug('EXTEND UTIL objValues.itemId:', objValues.itemId);
             objValues.refId = exports.getItemRefId(objValues.itemId);
-            log.debug('EXTEND UTIL objValues.refId:', objValues.refId);
-
-
             var objJSON = {
                 'transactionId': objValues.id,
                 'transactionDate': objValues.tran_date,
@@ -240,7 +215,7 @@
 
                     'purchasePrice': {
                         'currencyCode': objValues.currency,
-                        'amount': objValues.purchase_price * 100,
+                        'amount': parseInt(objValues.purchase_price * 100),
                     }
                     
                     // 'serialNumber' : objValues.serial_number
@@ -250,7 +225,7 @@
 
                     'purchasePrice': {
                         'currencyCode': objValues.currency,
-                        'amount': objValues.plan_price * 100
+                        'amount': parseInt(objValues.plan_price * 100),
                     },
 
                     'planId': objValues.extend_plan_id

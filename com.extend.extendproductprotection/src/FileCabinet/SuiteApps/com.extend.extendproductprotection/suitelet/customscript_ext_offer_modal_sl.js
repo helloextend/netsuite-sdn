@@ -33,7 +33,9 @@ define([
             if (!objEventRouter[context.request.method]) {
                 _handleError(context);
             }
-            objEventRouter[context.request.method](context);
+            try {
+                objEventRouter[context.request.method](context);
+            } catch (e) { }
         };
 
 
@@ -129,23 +131,30 @@ define([
         };
         function _getDescription(stTerm) {
             var stText = '';
-            switch (parseInt(stTerm)) {
-                case 12:
-                    stText = "Extend 1yr Protection Plan";
-                    break;
-                case 24:
-                    stText = "Extend 2yr Protection Plan";
-                    break;
-                case 36:
-                    stText = "Extend 3yr Protection Plan";
-                    break;
-                case 48:
-                    stText = "Extend 4yr Protection Plan";
-                    break;
-                case 60:
-                    stText = "Extend 5yr Protection Plan";
-                    break;
-            }
+            //term change to formula instead of case
+            var stTermYears = parseInt(stTerm) / 12;
+            log.debug('stTermYears', stTermYears);
+            stText = "Extend " + stTermYears + "yr Protection Plan";
+            //lifetime plans how is term returned
+            /*
+                        switch (parseInt(stTerm)) {
+                            case 12:
+                                stText = "Extend 1yr Protection Plan";
+                                break;
+                            case 24:
+                                stText = "Extend 2yr Protection Plan";
+                                break;
+                            case 36:
+                                stText = "Extend 3yr Protection Plan";
+                                break;
+                            case 48:
+                                stText = "Extend 4yr Protection Plan";
+                                break;
+                            case 60:
+                                stText = "Extend 5yr Protection Plan";
+                                break;
+                        }
+                        */
             return stText;
         };
         function _handleError(context) {
@@ -162,8 +171,8 @@ define([
                 log.debug('GET Params', context.request.parameters);
                 // Get plans and populate sublist
                 log.debug('arrItemList', context.request.parameters.arrItemid + typeof context.request.parameters.arrItemid);
-
-                var arrItemList = JSON.parse(context.request.parameters.arrItemid);
+                var arrItemList = [];
+                arrItemList = JSON.parse(context.request.parameters.arrItemid);
                 var stItemInternalId = context.request.parameters.itemid;
                 var stItemRefId = context.request.parameters.refid;
                 log.debug('stItemRefId', stItemRefId);
@@ -194,7 +203,10 @@ define([
                 objItemListField.updateDisplayType({
                     displayType: ui.FieldDisplayType.HIDDEN
                 });
-                objItemListField.defaultValue = context.request.parameters.arrItemid;
+                if (context.request.parameters.arrItemid) {
+                    objItemListField.defaultValue = context.request.parameters.arrItemid;
+
+                }
                 //Hidden field of item name
                 var objItemNameField = objForm.addField({
                     id: 'custpage_item_name',
@@ -214,7 +226,7 @@ define([
                     type: ui.FieldType.TEXT,
                     label: 'Item Ref ID'
                 });
-                objItemNameField.updateDisplayType({
+                objItemRefIdField.updateDisplayType({
                     displayType: ui.FieldDisplayType.HIDDEN
                 });
                 if (context.request.parameters.refid) {
@@ -341,41 +353,55 @@ define([
                  * POPULATE SUBLIST 
                  */
                 if (stItemRefId) {
-                    var objResponseBody = api.getPlansByItem(stItemRefId);
+                    try {
+                        var objResponse = api.getPlansByItem(stItemRefId);
+                        log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
+                        if (objResponse.code == 200) {
+                            var objResponseBody = JSON.parse(objResponse.body);
 
-                    log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
-                    var objPlans = objResponseBody.plans;
-                    var arrPlans = objPlans.base;
+                            log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
 
-                    if (arrPlans.length == 0) {
-                        var arrPlans = objPlans.adh;
+                            var objPlans = objResponseBody.plans;
+                            log.debug('OFFER MODAL SUITELET: objPlans', objPlans);
+
+                            var arrPlans = objPlans.base;
+                            log.debug('OFFER MODAL SUITELET: arrPlans', arrPlans);
+
+                            if (arrPlans.length == 0) {
+                                var arrPlans = objPlans.adh;
+                            }
+
+                            log.debug('arrPlans', arrPlans);
+
+                            //Populate Sublist Values
+                            for (var i = 0; i < arrPlans.length; i++) {
+                                objPlanList.setSublistValue({
+                                    id: 'custpage_item_id',
+                                    line: i,
+                                    value: arrPlans[i].id
+                                });
+                                objPlanList.setSublistValue({
+                                    id: 'custpage_plan_title',
+                                    line: i,
+                                    value: arrPlans[i].title
+                                });
+                                objPlanList.setSublistValue({
+                                    id: 'custpage_plan_term',
+                                    line: i,
+                                    value: parseInt(arrPlans[i].contract.termLength)
+                                });
+                                objPlanList.setSublistValue({
+                                    id: 'custpage_plan_price',
+                                    line: i,
+                                    value: parseFloat(arrPlans[i].price) / 100
+                                });
+                            }
+                        }
+
+                    } catch (e) {
+
                     }
 
-                    log.debug('arrPlans', arrPlans);
-
-                    //Populate Sublist Values
-                    for (var i = 0; i < arrPlans.length; i++) {
-                        objPlanList.setSublistValue({
-                            id: 'custpage_item_id',
-                            line: i,
-                            value: arrPlans[i].id
-                        });
-                        objPlanList.setSublistValue({
-                            id: 'custpage_plan_title',
-                            line: i,
-                            value: arrPlans[i].title
-                        });
-                        objPlanList.setSublistValue({
-                            id: 'custpage_plan_term',
-                            line: i,
-                            value: parseInt(arrPlans[i].contract.termLength)
-                        });
-                        objPlanList.setSublistValue({
-                            id: 'custpage_plan_price',
-                            line: i,
-                            value: parseFloat(arrPlans[i].price) / 100
-                        });
-                    }
                 }
                 //Set Client handler
                 objForm.clientScriptModulePath = '../client/customscript_ext_offer_modal_controller.js';

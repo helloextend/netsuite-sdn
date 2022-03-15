@@ -11,7 +11,7 @@
  *@NScriptType MapReduceScript
  *@ModuleScope Public
  */
-define([
+ define([
     'N/runtime',
     'N/record',
     'N/search',
@@ -92,7 +92,7 @@ define([
                 log.debug('reduce: Line Count', stLineCount);
 
                 if (stLineCount > 0) {
-                    log.audit('reduce: Get Extend Data', '**START**');
+                    log.debug('reduce: Get Extend Data', '**START**');
                     var objExtendData = _getExtendData(stLineCount, objSalesOrderRecord);
                     log.audit('reduce: Line Data to Extend Object', objExtendData);
 
@@ -154,7 +154,7 @@ define([
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');
             var objExtendItemData = {};
 
-            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_item_id');
+            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 //Check if item is one of the configured extend items
@@ -167,7 +167,7 @@ define([
                     if (stContractQty < stExtendItemQty) {
 
                         //get related item from extend line
-                        var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_item', line: i });
+                        var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
                         //check for new fulfillments
                         for (var j = 0; j < stLineCount; j++) {
                             var stRelatedItem = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
@@ -186,6 +186,7 @@ define([
                                     objExtendItemData[stUniqueKey].extend_plan_id = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
                                     objExtendItemData[stUniqueKey].itemId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
                                     objExtendItemData[stUniqueKey].plan_price = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i });
+                                 
                                 }
                             }
                         }
