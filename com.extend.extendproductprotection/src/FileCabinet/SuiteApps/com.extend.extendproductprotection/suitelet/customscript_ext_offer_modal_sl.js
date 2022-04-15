@@ -135,26 +135,6 @@ define([
             var stTermYears = parseInt(stTerm) / 12;
             log.debug('stTermYears', stTermYears);
             stText = "Extend " + stTermYears + "yr Protection Plan";
-            //lifetime plans how is term returned
-            /*
-                        switch (parseInt(stTerm)) {
-                            case 12:
-                                stText = "Extend 1yr Protection Plan";
-                                break;
-                            case 24:
-                                stText = "Extend 2yr Protection Plan";
-                                break;
-                            case 36:
-                                stText = "Extend 3yr Protection Plan";
-                                break;
-                            case 48:
-                                stText = "Extend 4yr Protection Plan";
-                                break;
-                            case 60:
-                                stText = "Extend 5yr Protection Plan";
-                                break;
-                        }
-                        */
             return stText;
         };
         function _handleError(context) {

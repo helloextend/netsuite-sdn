@@ -25,8 +25,8 @@ define([
             log.debug('BEFORESUBMIT: Context', context);
 
             var objEventRouter = {
-                'create': _handleBeforeSubmit,
-                'edit': _handleBeforeSubmit
+                'create': _handleBeforeSubmitCreate,
+                'edit': _handleBeforeSubmitEdit
             }
 
             if (typeof objEventRouter[context.type] !== 'function') {
@@ -37,11 +37,13 @@ define([
             return true;
 
         };
-        function _handleBeforeSubmit(context) {
+        function _handleBeforeSubmitCreate(context) {
             _environmentValidate(context);
             _itemFieldValidate(context);
         }
-
+        function _handleBeforeSubmitEdit(context) {
+            _itemFieldValidate(context);
+        }
         function _environmentValidate(context) {
             //get environment field on current rec
             var objNewRecord = context.newRecord;

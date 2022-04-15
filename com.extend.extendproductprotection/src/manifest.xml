@@ -22,6 +22,8 @@
       <feature required="false">OPPORTUNITIES</feature>
       <feature required="false">ACCOUNTING</feature>
       <feature required="false">WORKORDERS</feature>
+      <feature required="false">RECEIVABLES</feature>
+      <feature required="false">PAYABLES</feature>
     </features>
   </dependencies>
 </manifest>

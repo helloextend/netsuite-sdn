@@ -53,7 +53,7 @@
                         })
                         objNoteRecord.setValue('transaction', objSalesOrderRecord.id);
                         objNoteRecord.setValue('title', 'Extend Contract Create Error | Line ' + key);
-                        objNoteRecord.setValue('note', objExtendResponse);
+                        objNoteRecord.setValue('note', JOSN.stringify(objExtendResponse));
                         var stNoteId = objNoteRecord.save();
                     }
                 }
@@ -176,6 +176,11 @@
 
             //get product refId
             objValues.refId = exports.getItemRefId(objValues.itemId);
+            //If Demo use demo email for contracts
+            log.debug('demo email', EXTEND_CONFIG.getConfig());
+            if(EXTEND_CONFIG.getConfig().email){
+                objValues.email = EXTEND_CONFIG.getConfig().email;
+            }
             var objJSON = {
                 'transactionId': objValues.id,
                 'transactionDate': objValues.tran_date,
@@ -183,7 +188,7 @@
 
                 'transactionTotal': {
                     'currencyCode': objValues.currency,
-                    'amount': objValues.total_amount * 100
+                    'amount': parseInt(objValues.total_amount * 100)
                 },
 
                 'currency': objValues.currency,
