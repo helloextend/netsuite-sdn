@@ -133,7 +133,7 @@
           return response;
         }
       } catch (e) {
-        log.debug('Error Fetcing Plans', JSON.stringify(e.message));
+        log.debug('Error Calling API', JSON.stringify(e.message));
         return;
       }
     };
@@ -211,7 +211,7 @@
           return response;
         }
       } catch (e) {
-        log.debug('Error Cancelling Contract', JSON.stringify(e.message));
+        log.debug('Error Calling API', JSON.stringify(e.message));
         return;
       }
     };
@@ -256,6 +256,84 @@
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
           },
+        });
+        if (response) {
+          return response;
+        }
+      } catch (e) {
+        log.debug('Error Calling API', JSON.stringify(e.message));
+        return;
+      }
+    };
+    /*****************************************ORDERS*****************************************/
+
+    /**
+     * CREATE ORDER
+     * API Documentation: https://docs.extend.com/reference/orderscreate
+     */
+     exports.createOrder = function (objOrderDetails) {
+      var config = extendConfig.getConfig();
+
+      try {
+        var response = https.post({
+          url: config.domain + '/orders',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-Extend-Access-Token': config.key,
+            'Accept': 'application/json;version=' + config.version
+          },
+          body: JSON.stringify(objOrderDetails),
+        });
+        if (response) {
+          return response;
+        }
+      } catch (e) {
+        log.debug('Error Calling API', JSON.stringify(e.message));
+        return;
+      }
+    };
+    /**
+ * UPDATE ORDER LINE FULFILLMENT
+ * API Documentation: https://docs.extend.com/reference/lineitemsfulfill
+ */
+    exports.fulfillOrderLine = function (objOrderDetails, stLineItemId) {
+      var config = extendConfig.getConfig();
+      try {
+        var response = https.post({
+          url: config.domain + '/line-items/' + stLineItemId + '/fulfill',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-Extend-Access-Token': config.key,
+            'Accept': 'application/json;version=' + config.version
+          },
+          body: JSON.stringify(objOrderDetails),
+        });
+        if (response) {
+          return response;
+        }
+      } catch (e) {
+        log.debug('Error Calling API', JSON.stringify(e.message));
+        return;
+      }
+    };
+
+    /**
+     * REFUND CONTRACT
+     * API Documentation: https://docs.extend.com/reference/refundscreate
+     */
+    exports.refundContract = function (objRefundDetails) {
+      var config = extendConfig.getConfig();
+      try {
+        var response = https.post({
+          url: config.domain + '/refunds',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Extend-Access-Token': config.key,
+            'Accept': 'application/json;version=' + config.version
+          },
+          body: JSON.stringify(objRefundDetails),
         });
         if (response) {
           return response;
