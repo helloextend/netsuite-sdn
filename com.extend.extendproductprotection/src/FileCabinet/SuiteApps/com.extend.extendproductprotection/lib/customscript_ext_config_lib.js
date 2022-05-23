@@ -16,12 +16,12 @@
             //Get storeId & APIkey from config custom record
             var SB_STORE_ID; 
             var SB_API_KEY; 
-            var SB_API_VERSION;
+            var SB_API_VERSION = 'latest';
             var SB_EMAIL;
             var SB_REF_ID;
             var STORE_ID;
             var API_KEY;
-            var API_VERSION;
+            var API_VERSION = 'latest';
             var REF_ID;
             
             var customrecord_ext_configurationSearchObj = search.create({
@@ -43,15 +43,20 @@
                 if(stEnvironment == objExtendEnvironment.SANDBOX){
                     SB_STORE_ID  = result.getValue({ name: 'custrecord_ext_store_id' }); 
                     SB_API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });
-                    SB_API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
                     SB_EMAIL  = result.getValue({ name: 'custrecord_ext_demo_email' });
                     SB_REF_ID  = result.getValue({ name: 'custrecord_ext_ref_id' });
+                    if(result.getValue({ name: 'custrecord_ext_api_version' })){
+                        SB_API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
+
+                    }
 
                 }else{
                     STORE_ID  = result.getValue({ name: 'custrecord_ext_store_id' });
                     API_KEY  = result.getValue({ name: 'custrecord_ext_api_key' });
-                    API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
                     REF_ID  = result.getValue({ name: 'custrecord_ext_ref_id' });
+                    if(result.getValue({ name: 'custrecord_ext_api_version' })){
+                        API_VERSION  = result.getValue({ name: 'custrecord_ext_api_version' });
+                    }
 
                 }
 

@@ -25,7 +25,6 @@
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/products?upsert=' + bIsUpsert + '?batch=' + bIsBatch,
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
@@ -51,7 +50,6 @@
         var response = https.put({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
@@ -118,7 +116,7 @@
      * GET OFFERS
      * API Documentation: https://developers.extend.com/default#operation/getOffer
      */
-    exports.getPlansByItem = function (stItemId) {
+    exports.getOffers= function (stItemId) {
       var config = extendConfig.getConfig();
       try {
         var response = https.get({
@@ -137,84 +135,7 @@
         return;
       }
     };
-    /*****************************************CONTRACTS*****************************************/
-
-    /**
-     * CREATE CONTRACT
-     * API Documentation: https://developers.extend.com/default#operation/createContracts
-     */
-    exports.createWarrantyContract = function (objContractDetails) {
-      var config = extendConfig.getConfig();
-
-
-      try {
-        var response = https.post({
-          url: config.domain + '/stores/' + config.storeId + '/contracts',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json;version=' + config.version
-          },
-          body: JSON.stringify(objContractDetails),
-        });
-        if (response) {
-          return response;
-        }
-      } catch (e) {
-        log.debug('Error Calling API', JSON.stringify(e.message));
-        return;
-      }
-    };
-    /**
- * UPDATE CONTRACT
- * API Documentation: https://developers.helloextend.com/2020-08-01#operation/updateContracts
- */
-    exports.updateWarrantyContract = function (objContractDetails, stContractId) {
-      var config = extendConfig.getConfig();
-      try {
-        var response = https.put({
-          url: config.domain + '/contracts/' + stContractId,
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json;version=' + config.version
-          },
-          body: JSON.stringify(objContractDetails),
-        });
-        if (response) {
-          return response;
-        }
-      } catch (e) {
-        log.debug('Error Calling API', JSON.stringify(e.message));
-        return;
-      }
-    };
-
-    /**
-     * CANCEL CONTRACT
-     * API Documentation: https://developers.extend.com/default#operation/refundContract
-     */
-    exports.cancelWarrantyContract = function (stContractId, bIsCommit) {
-      var config = extendConfig.getConfig();
-      try {
-        var response = https.post({
-          url: config.domain + '/stores/' + config.storeId + '/contracts/' + stContractId + '/refund?commit=' + bIsCommit,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json;version=' + config.version
-          },
-        });
-        if (response) {
-          return response;
-        }
-      } catch (e) {
-        log.debug('Error Calling API', JSON.stringify(e.message));
-        return;
-      }
-    };
+    
     /*****************************************LEADS*****************************************/
     /**
      * CREATE LEAD
@@ -226,7 +147,6 @@
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/leads',
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
@@ -278,7 +198,6 @@
         var response = https.post({
           url: config.domain + '/orders',
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
@@ -303,7 +222,6 @@
         var response = https.post({
           url: config.domain + '/line-items/' + stLineItemId + '/fulfill',
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
             'Accept': 'application/json;version=' + config.version
@@ -343,6 +261,54 @@
         return;
       }
     };
+    /**
+     * GET REFUND QUOTE
+     * API Documentation: https://docs.extend.com/reference/refundsget
+     */
+         exports.getRefundQuote = function (objRefundDetails) {
+          var config = extendConfig.getConfig();
+          try {
+            var response = https.get({
+              url: config.domain + '/refunds',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Extend-Access-Token': config.key,
+                'Accept': 'application/json;version=' + config.version
+              },
+              body: JSON.stringify(objRefundDetails),
+            });
+            if (response) {
+              return response;
+            }
+          } catch (e) {
+            log.debug('Error Calling API', JSON.stringify(e.message));
+            return;
+          }
+        };
+/**
+     * REQUEST REFUND
+     * API Documentation: https://docs.extend.com/reference/refundscreate
+     */
+ exports.requestRefund = function (objRefundDetails) {
+  var config = extendConfig.getConfig();
+  try {
+    var response = https.post({
+      url: config.domain + '/refunds',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Extend-Access-Token': config.key,
+        'Accept': 'application/json;version=' + config.version
+      },
+      body: JSON.stringify(objRefundDetails),
+    });
+    if (response) {
+      return response;
+    }
+  } catch (e) {
+    log.debug('Error Calling API', JSON.stringify(e.message));
+    return;
+  }
+};
 
     return exports;
   });
