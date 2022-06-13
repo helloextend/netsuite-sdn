@@ -2,7 +2,7 @@
   <publisherid>com.extend</publisherid>
   <projectid>extendproductprotection</projectid>
   <projectname>Extend Product Protection</projectname>
-  <projectversion>1.0.0</projectversion>
+  <projectversion>1.0.9</projectversion>
   <frameworkversion>1.0</frameworkversion>
   <dependencies>
     <features>
