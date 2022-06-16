@@ -170,7 +170,6 @@ define([
             return stPurchasePrice;
         };
         exports.getSalesOrderItemInfo = function (objSalesOrderRecord) {
-
             //////////////////////////SUPPORT FUNCTIONS///////////////////////////
             var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
 
