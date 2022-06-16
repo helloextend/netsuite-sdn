@@ -24,7 +24,7 @@ define([
             try {
                 log.audit('getInputData', '** START **');
                 //todo build search in getinput instead of param?
-                var stSalesOrderSearchID = runtime.getCurrentScript().getParameter('custscript_ext_so_search');
+                var stSalesOrderSearchID = runtime.getCurrentScript().getParameter('custscript_ext_order_search');
 
                 log.debug('stSalesOrderSearchID', stSalesOrderSearchID);
                 var salesOrderSearch = search.load({
@@ -49,7 +49,6 @@ define([
                     id: stSalesOrderId
                 });
                 // Get Extend Details from Sales Order
-                log.audit('reduce: SO Data to Extend Object', objExtendData);
                 objExtendData = EXTEND_UTIL.createExtendOrder(objSalesOrderRecord);
 
             } catch (e) {

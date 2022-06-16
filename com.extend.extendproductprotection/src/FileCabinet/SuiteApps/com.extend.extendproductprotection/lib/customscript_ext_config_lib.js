@@ -26,7 +26,9 @@
             
             var customrecord_ext_configurationSearchObj = search.create({
                 type: "customrecord_ext_configuration",
-                filters:[],
+                filters:[
+                    ["isinactive","is","F"]
+                ],
                 columns:
                 [
                    search.createColumn({name: "custrecord_ext_environment", label: "Environment "}),
@@ -84,7 +86,7 @@
             //param is custom record extend config
             var stEnvironment = runtime.getCurrentScript().getParameter('custscript_ext_environment');
             log.audit('stEnvironment', stEnvironment);
-            switch(stEnvironment){
+            switch(Number(stEnvironment)){
                 case objExtendEnvironment.SANDBOX:
                     stEnvironment = 'SANDBOX'
                     break;
@@ -98,8 +100,8 @@
             var objKeys = {};
 
             objKeys['SANDBOX'] = objSandbox;
-            objKeys['PRODUCTION'] = objSandbox; //Demo Purposes 
-            //objKeys['PRODUCTION'] = objProd;
+            //objKeys['PRODUCTION'] = objSandbox; //Demo Purposes 
+            objKeys['PRODUCTION'] = objProd;
             //by runtime or by global param
             //runtime 
             /*
