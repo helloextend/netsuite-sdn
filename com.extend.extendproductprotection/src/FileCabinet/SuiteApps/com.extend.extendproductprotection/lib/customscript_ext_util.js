@@ -60,13 +60,15 @@ define([
 
             objSalesOrderRecord.save();
         };
-        exports.handleResponse = function (objExtendResponse, objSalesOrderRecord) {
+        exports.handleResponse = function (objExtendResponseBody, objSalesOrderRecord) {
 
             log.debug('EXTEND UTIL _createExtendOrder: Extend Response Body Parsed: ', objExtendResponseBody);
             var arrLineItems = objExtendResponseBody.lineItems;
             var objExtendResponseData = {};
                 
             for (var i = 0; i < arrLineItems.length; i++) {
+                objExtendResponseData[i] = {}
+                objExtendResponseData[i].contractIds = [];
                 log.debug('EXTEND UTIL _createExtendOrder: arrLineItems: ', arrLineItems[i]);
                 var line = arrLineItems[i].lineItemTransactionId;
                 line = line.substring(objSalesOrderRecord.id.toString().length, line.length);
@@ -81,13 +83,18 @@ define([
                     log.debug('EXTEND UTIL _createExtendOrder: contractid arrLineItems: ', arrLineItems[i].contractId);
                     arrContractIds.push(arrLineItems[i].contractId)
                     objExtendResponseData[stUniqueKey].contractIds = arrContractIds;
-
-                    // If Extend contract is created, populate the appropriate custom column field for contracts
-                    // on the Sales Order line
-                   // objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: line, value: JSON.stringify(arrContractIds) });
-
                 }
             }
+            for(key in objExtendResponseData){
+                log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].contractIds: ', objExtendResponseData[key].contractIds);
+
+ // If Extend contract is created, populate the appropriate custom column field for contracts
+                    // on the Sales Order line
+                    objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
+    
+            }
+            return objSalesOrderRecord;
+           
         };
             //get Sales Order Info required for contract create
             exports.getSalesOrderInfo = function (objSalesOrderRecord) {
