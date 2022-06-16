@@ -44,7 +44,7 @@ define([
             //handle response
             if (objExtendResponse.code === 201) {
                 var objExtendResponseBody = JSON.parse(objExtendResponse.body);
-                EXTEND_API.handleResponse(objExtendResponseBody, objSalesOrderRecord);
+                exports.handleResponse(objExtendResponseBody, objSalesOrderRecord);
             } else {
                 log.error('EXTEND UTIL _createExtendContracts', objExtendResponse);
                 objSalesOrderRecord.setValue({ fieldId: 'custbody_ext_process_error', value: true });
