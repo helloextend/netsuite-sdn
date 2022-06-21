@@ -44,7 +44,10 @@ define([
             //handle response
             if (objExtendResponse.code === 201) {
                 var objExtendResponseBody = JSON.parse(objExtendResponse.body);
-                exports.handleResponse(objExtendResponseBody, objSalesOrderRecord);
+                exports.handleOrderResponse(objExtendResponseBody, objSalesOrderRecord);
+                //make SO as extend order created
+                objSalesOrderRecord.setValue({ fieldId: 'custbody_ext_order_create', value: true });
+
             } else {
                 log.error('EXTEND UTIL _createExtendContracts', objExtendResponse);
                 objSalesOrderRecord.setValue({ fieldId: 'custbody_ext_process_error', value: true });
@@ -60,12 +63,18 @@ define([
 
             objSalesOrderRecord.save();
         };
-        exports.handleResponse = function (objExtendResponseBody, objSalesOrderRecord) {
+        //fulfill items on order
+        exports.fulfillExtendOrder = function () {
+
+        };
+        /***********************************Support Functions********************************************/
+
+        exports.handleOrderResponse = function (objExtendResponseBody, objSalesOrderRecord) {
 
             log.debug('EXTEND UTIL _createExtendOrder: Extend Response Body Parsed: ', objExtendResponseBody);
             var arrLineItems = objExtendResponseBody.lineItems;
             var objExtendResponseData = {};
-                
+
             for (var i = 0; i < arrLineItems.length; i++) {
                 objExtendResponseData[i] = {}
                 objExtendResponseData[i].contractIds = [];
@@ -74,7 +83,6 @@ define([
                 line = line.substring(objSalesOrderRecord.id.toString().length, line.length);
                 log.debug('EXTEND UTIL _createExtendOrder: line: ', line + '|' + typeof line);
                 stUniqueKey = line;
-
 
                 if (arrLineItems[i].type == 'contract') {
                     var arrContractIds = [];
@@ -85,366 +93,371 @@ define([
                     objExtendResponseData[stUniqueKey].contractIds = arrContractIds;
                 }
             }
-            for(key in objExtendResponseData){
+            for (key in objExtendResponseData) {
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].contractIds: ', objExtendResponseData[key].contractIds);
 
- // If Extend contract is created, populate the appropriate custom column field for contracts
-                    // on the Sales Order line
-                    objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
-    
+                // If Extend contract is created, populate the appropriate custom column field for contracts
+                // on the Sales Order line
+                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
+
             }
             return objSalesOrderRecord;
-           
+
         };
-            //get Sales Order Info required for contract create
-            exports.getSalesOrderInfo = function (objSalesOrderRecord) {
-                log.debug('EXTEND UTIL _getSalesOrderInfo:', '**ENTER**');
-                var objExtendData = {};
-                log.debug('EXTEND UTIL _getSalesOrderInfo: ExtendData Object', objExtendData);
-                var objCustomerInfo = exports.getCustomerInfo(objSalesOrderRecord.getValue({ fieldId: 'entity' }));
-                var objShipAddress = exports.getAddress(objSalesOrderRecord, 'shippingaddress');
-                var objBillAddress = exports.getAddress(objSalesOrderRecord, 'billingaddress');
-                //Build SO Info Object
-                objExtendData.id = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
-                objExtendData.tran_date = exports.getepochDate();
-                objExtendData.currency = 'USD';
-                objExtendData.order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
-                objExtendData.total_amount = objSalesOrderRecord.getValue({ fieldId: 'total' });
-                objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
-                objExtendData.email = objCustomerInfo.email;
-                objExtendData.phone = objCustomerInfo.phone;
-                objExtendData.bill_address1 = objBillAddress.address1;
-                objExtendData.bill_address2 = objBillAddress.address2;
-                objExtendData.bill_city = objBillAddress.city;
-                objExtendData.bill_state = objBillAddress.state;
-                objExtendData.bill_zip = objBillAddress.zip;
-                objExtendData.bill_country = objBillAddress.country;
-                objExtendData.ship_address1 = objShipAddress.address1;
-                objExtendData.ship_address2 = objShipAddress.address2;
-                objExtendData.ship_city = objShipAddress.city;
-                objExtendData.ship_state = objShipAddress.state;
-                objExtendData.ship_zip = objShipAddress.zip;
-                objExtendData.ship_country = objShipAddress.country;
-                return objExtendData;
-            };
-            exports.getAddress = function (objSalesOrderRecord, addressField) {
-                var address = objSalesOrderRecord.getSubrecord({
-                    fieldId: addressField
-                });
-                var objAddress = {
-                    address1: address.getValue({
-                        fieldId: 'addr1'
-                    }),
-                    address2: address.getValue({
-                        fieldId: 'addr2'
-                    }),
-                    city: address.getValue({
-                        fieldId: 'city'
-                    }),
-                    state: address.getValue({
-                        fieldId: 'state'
-                    }),
-                    country: address.getValue({
-                        fieldId: 'country'
-                    }),
-                    zip: address.getValue({
-                        fieldId: 'zip'
-                    })
-                };
-                return objAddress;
+        //get Sales Order Info required for contract create
+        exports.getSalesOrderInfo = function (objSalesOrderRecord) {
+            log.debug('EXTEND UTIL _getSalesOrderInfo:', '**ENTER**');
+            var objExtendData = {};
+            log.debug('EXTEND UTIL _getSalesOrderInfo: ExtendData Object', objExtendData);
+            var objCustomerInfo = exports.getCustomerInfo(objSalesOrderRecord.getValue({ fieldId: 'entity' }));
+            var objShipAddress = exports.getAddress(objSalesOrderRecord, 'shippingaddress');
+            var objBillAddress = exports.getAddress(objSalesOrderRecord, 'billingaddress');
+            //Build SO Info Object
+            objExtendData.id = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
+            objExtendData.tran_date = exports.getepochDate();
+            objExtendData.currency = 'USD';
+            objExtendData.order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
+            objExtendData.total_amount = objSalesOrderRecord.getValue({ fieldId: 'total' });
+            objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
+            objExtendData.email = objCustomerInfo.email;
+            objExtendData.phone = objCustomerInfo.phone;
+            objExtendData.bill_address1 = objBillAddress.address1;
+            objExtendData.bill_address2 = objBillAddress.address2;
+            objExtendData.bill_city = objBillAddress.city;
+            objExtendData.bill_state = objBillAddress.state;
+            objExtendData.bill_zip = objBillAddress.zip;
+            objExtendData.bill_country = objBillAddress.country;
+            objExtendData.ship_address1 = objShipAddress.address1;
+            objExtendData.ship_address2 = objShipAddress.address2;
+            objExtendData.ship_city = objShipAddress.city;
+            objExtendData.ship_state = objShipAddress.state;
+            objExtendData.ship_zip = objShipAddress.zip;
+            objExtendData.ship_country = objShipAddress.country;
+            return objExtendData;
+        };
+
+        exports.getSalesOrderItemInfo = function (objSalesOrderRecord) {
+            //////////////////////////SUPPORT FUNCTIONS///////////////////////////
+            var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
+
+            log.debug('EXTEND UTIL _createExtendOrder: Line Count', stLineCount);
+            log.debug('_getExtendData: Get Extend Data', '**ENTER**');
+
+            var objExtendItemData = {};
+
+            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            for (var i = 0; i < stLineCount; i++) {
+                var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
+                stUniqueKey = i;
+                if (stExtendItemId !== stItemId) {
+                    objExtendItemData[stUniqueKey] = {};
+                }
+                //Check if item is one of the configured extend items
+                if (stExtendItemId === stItemId) {
+                    log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
+
+                    //get related item from extend line
+                    var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
+                    for (var j = 0; j < stLineCount; j++) {
+                        var stRelatedItem = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
+                        if (stRelatedItem === stExtendItemRefId) {
+                            log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stRelatedItem + ' | ' + stExtendItemRefId);
+
+                            stUniqueKey = j;
+                            // Start building the Extend Order Plan Info Object
+                            objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
+                            objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
+                            objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
+                            objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
+                            objExtendItemData[stUniqueKey].extend_line = i;
+
+                        }
+                    }
+                } else {
+                    // Start building the Extend Order Item Info Object
+                    objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                    objExtendItemData[stUniqueKey].itemId = stItemId
+                    objExtendItemData[stUniqueKey].line = i;
+                    objExtendItemData[stUniqueKey].purchase_price = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i });
+                    objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + i;
+                }
+
             }
-            exports.getItemRefId = function (stItemId) {
-                var config = EXTEND_CONFIG.getConfig();
-                var refIdValue = config.refId;
-                var stItemRefId = stItemId;
-                if (refIdValue) {
-                    // Lookup to item to see if it is eligible for warranty offers
-                    var arrItemLookup = search.lookupFields({
-                        type: 'item',
-                        id: stItemId,
-                        columns: refIdValue
-                    });
-                    for (var prop in arrItemLookup) {
-                        var stItemRefId = arrItemLookup[prop]
-                        break;
-                    }
-                }
-
-                return stItemRefId;
-            }
-            //get Transaction Date required for contract create
-            exports.getTransactionDate = function (stDate) {
-                var stTimeDate = new Date(stDate);
-                return stTimeDate.getTime() / 1000;
-            };
-            //get Current Date in epoch format required for contract create
-            exports.getepochDate = function () {
-                var stTimeDate = new Date();
-                return stTimeDate.getTime();
-            };
-            //get Customer Info required for contract create
-            exports.getCustomerInfo = function (stCustomerId) {
-                var objCustomerRecord = record.load({
-                    type: 'customer',
-                    id: stCustomerId
-                });
-                var objCustomerInfo = {
-                    "email": objCustomerRecord.getValue({ fieldId: 'email' }),
-                    "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
-                    "bill_address1": objCustomerRecord.getValue({ fieldId: 'billaddr1' }),
-                    "bill_address2": objCustomerRecord.getValue({ fieldId: 'billaddr2' }),
-                    "bill_city": objCustomerRecord.getValue({ fieldId: 'billcity' }),
-                    "bill_state": objCustomerRecord.getValue({ fieldId: 'billstate' }),
-                    "bill_zip": objCustomerRecord.getValue({ fieldId: 'billzip' }),
-                    "bill_country": "US",
-                    "ship_address1": objCustomerRecord.getValue({ fieldId: 'shipaddr1' }),
-                    "ship_address2": objCustomerRecord.getValue({ fieldId: 'shipaddr2' }),
-                    "ship_city": objCustomerRecord.getValue({ fieldId: 'shipcity' }),
-                    "ship_state": objCustomerRecord.getValue({ fieldId: 'shipstate' }),
-                    "ship_zip": objCustomerRecord.getValue({ fieldId: 'shipzip' }),
-                    "ship_country": "US",
-                }
-                return objCustomerInfo;
-            };
-            //get Item Purchase Price
-            exports.getPurchasePrice = function (stItemId) {
-                var arrFilters = [];
-                arrFilters.push(search.createFilter({ name: 'internalid', operator: 'is', values: [stItemId] }));
-                var arrColumns = [];
-                arrColumns.push(search.createColumn({ name: 'baseprice' }));
-
-                var arrSearchResults = exports.search('item', null, arrFilters, arrColumns);
-                var stPurchasePrice;
-                if (arrSearchResults.length) {
-                    stPurchasePrice = arrSearchResults[0].getValue({ name: 'baseprice' });
-                }
-                return stPurchasePrice;
-            };
-            exports.getSalesOrderItemInfo = function (objSalesOrderRecord) {
-                //////////////////////////SUPPORT FUNCTIONS///////////////////////////
-                var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
-
-                log.debug('EXTEND UTIL _createExtendOrder: Line Count', stLineCount);
-                log.debug('_getExtendData: Get Extend Data', '**ENTER**');
-
-                var objExtendItemData = {};
-
-                var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
-                for (var i = 0; i < stLineCount; i++) {
-                    var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
-                    stUniqueKey = i;
-                    if (stExtendItemId !== stItemId) {
-                        objExtendItemData[stUniqueKey] = {};
-                    }
-                    //Check if item is one of the configured extend items
-                    if (stExtendItemId === stItemId) {
-                        log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
-
-                        //get related item from extend line
-                        var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
-                        for (var j = 0; j < stLineCount; j++) {
-                            var stRelatedItem = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
-                            if (stRelatedItem === stExtendItemRefId) {
-                                log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stRelatedItem + ' | ' + stExtendItemRefId);
-
-                                stUniqueKey = j;
-                                // Start building the Extend Order Plan Info Object
-                                objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
-                                objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
-                                objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
-                                objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
-
-                            }
-                        }
-                    } else {
-                        // Start building the Extend Order Item Info Object
-                        objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-                        objExtendItemData[stUniqueKey].itemId = stItemId
-                        objExtendItemData[stUniqueKey].line = i;
-                        objExtendItemData[stUniqueKey].purchase_price = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i });
-                        objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + i;
-                    }
-
-                }
-                return objExtendItemData;
-            };
-            exports.buildExtendItemJSON = function (objValues) {
-                //item json
-                var lineItems = [];
-                for (key in objValues) {
-                    //get product refId
-                    objValues.refId = exports.getItemRefId(objValues[key].itemId);
-                    var item = {
-                        'product': {
-                            'id': objValues.refId,
-                            // 'serialNumber': objValues.serial_number,
-                            'purchasePrice': parseInt(objValues[key].purchase_price * 100)
-                        },
-                        'quantity': objValues[key].quantity,
-                        'lineItemTransactionId': objValues[key].lineItemID
-                    }
-                    if (objValues[key].extend_plan_id && objValues[key].plan_price) {
-                        item.plan = {
-                            'id': objValues[key].extend_plan_id,
-                            'purchasePrice': objValues[key].plan_price
-                        }
-                    }
-                    lineItems.push(item);
-
-
-                }
-                log.debug('_buildExtendItemJSON: lineItems', lineItems);
-
-                return lineItems;
-            };
-            // Build the Extend API JSON for contract creation
-            exports.buildExtendOrderJSON = function (objValues) {
-                log.debug('EXTEND UTIL _buildExtendOrderJSON:', '**ENTER**');
-
-                // Date is a string and we need to format for extend
-                const stTranDate = new Date(objValues.tran_date);
-
-                //If Demo use demo email for contracts
-                var config = EXTEND_CONFIG.getConfig();
-                if (config.email) {
-                    objValues.email = config.email;
-                }
-
-                var objJSON = {
-                    'currency': objValues.currency,
-                    'customer': {
-                        'email': objValues.email,
-                        'name': objValues.name,
-                        'phone': objValues.phone,
-                        'billingAddress': {
-                            'address1': objValues.bill_address1,
-                            'address2': objValues.bill_address2,
-                            'city': objValues.bill_city,
-                            'postalCode': objValues.bill_zip,
-                            'countryCode': objValues.bill_country,
-                            'province': objValues.bill_state,
-                        },
-                        'shippingAddress': {
-                            'address1': objValues.ship_address1,
-                            'address2': objValues.ship_address2,
-                            'city': objValues.ship_city,
-                            'postalCode': objValues.ship_zip,
-                            'countryCode': objValues.ship_country,
-                            'province': objValues.ship_state
-
-                        }
+            return objExtendItemData;
+        };
+        exports.buildExtendItemJSON = function (objValues) {
+            //item json
+            var lineItems = [];
+            for (key in objValues) {
+                //get product refId
+                objValues.refId = exports.getItemRefId(objValues[key].itemId);
+                var item = {
+                    'product': {
+                        'id': objValues.refId,
+                        // 'serialNumber': objValues.serial_number,
+                        'purchasePrice': parseInt(objValues[key].purchase_price * 100)
                     },
-                    'storeId': config.storeId,
-                    'lineItems': objValues.lineItems,
-                    'total': parseInt(objValues.total_amount * 100),
-                    'transactionId': objValues.id,
+                    'quantity': objValues[key].quantity,
+                    'lineItemTransactionId': objValues[key].lineItemID
                 }
+                if (objValues[key].extend_plan_id && objValues[key].plan_price) {
+                    item.plan = {
+                        'id': objValues[key].extend_plan_id,
+                        'purchasePrice': objValues[key].plan_price
+                    }
+                }
+                lineItems.push(item);
 
-                return objJSON;
+
+            }
+            log.debug('_buildExtendItemJSON: lineItems', lineItems);
+
+            return lineItems;
+        };
+        // Build the Extend API JSON for contract creation
+        exports.buildExtendOrderJSON = function (objValues) {
+            log.debug('EXTEND UTIL _buildExtendOrderJSON:', '**ENTER**');
+
+            // Date is a string and we need to format for extend
+            const stTranDate = new Date(objValues.tran_date);
+
+            //If Demo use demo email for contracts
+            var config = EXTEND_CONFIG.getConfig();
+            if (config.email) {
+                objValues.email = config.email;
+            }
+
+            var objJSON = {
+                'currency': objValues.currency,
+                'customer': {
+                    'email': objValues.email,
+                    'name': objValues.name,
+                    'phone': objValues.phone,
+                    'billingAddress': {
+                        'address1': objValues.bill_address1,
+                        'address2': objValues.bill_address2,
+                        'city': objValues.bill_city,
+                        'postalCode': objValues.bill_zip,
+                        'countryCode': objValues.bill_country,
+                        'province': objValues.bill_state,
+                    },
+                    'shippingAddress': {
+                        'address1': objValues.ship_address1,
+                        'address2': objValues.ship_address2,
+                        'city': objValues.ship_city,
+                        'postalCode': objValues.ship_zip,
+                        'countryCode': objValues.ship_country,
+                        'province': objValues.ship_state
+
+                    }
+                },
+                'storeId': config.storeId,
+                'lineItems': objValues.lineItems,
+                'total': parseInt(objValues.total_amount * 100),
+                'transactionId': objValues.id,
+            }
+
+            return objJSON;
+        };
+        /***********************************Support Functions********************************************/
+        //get Address Subrecord fields from transaction 
+        exports.getAddress = function (objSalesOrderRecord, addressField) {
+            var address = objSalesOrderRecord.getSubrecord({
+                fieldId: addressField
+            });
+            var objAddress = {
+                address1: address.getValue({
+                    fieldId: 'addr1'
+                }),
+                address2: address.getValue({
+                    fieldId: 'addr2'
+                }),
+                city: address.getValue({
+                    fieldId: 'city'
+                }),
+                state: address.getValue({
+                    fieldId: 'state'
+                }),
+                country: address.getValue({
+                    fieldId: 'country'
+                }),
+                zip: address.getValue({
+                    fieldId: 'zip'
+                })
             };
-            /**
-             * Performs empty validations
-             */
-            exports.objectIsEmpty = function (obj) {
-                for (var prop in obj) {
-                    if (obj.hasOwnProperty(prop))
-                        return false;
-                }
-                return true;
-            };
-            exports.stringIsEmpty = function (stValue) {
-                if ((stValue == '') || (stValue == null) || (stValue == undefined)) {
-                    return true;
-                }
-                return false;
-            };
-            /**
-             * Createa Custom Error Object
-             */
-            exports.createError = function (objErrorDetails) {
-                var objCustomError = error.create({
-                    name: objErrorDetails.title,
-                    message: objErrorDetails.message,
-                    notifyOff: true
+            return objAddress;
+        }
+        //get Item's reference ID 
+        exports.getItemRefId = function (stItemId) {
+            var config = EXTEND_CONFIG.getConfig();
+            var refIdValue = config.refId;
+            var stItemRefId = stItemId;
+            if (refIdValue) {
+                // Lookup to item to see if it is eligible for warranty offers
+                var arrItemLookup = search.lookupFields({
+                    type: 'item',
+                    id: stItemId,
+                    columns: refIdValue
                 });
-                return objCustomError;
-            };
-
-            /**
-             * Performs search with no size limitations
-             */
-            exports.search = function (stRecordType, stSearchId, arrSearchFilter, arrSearchColumn, bUseFilterExpressions, arrSearchSetting) {
-                if (!stRecordType && !stSearchId) {
-                    throw 'search: Missing a required argument. Either stRecordType or stSearchId should be provided.';
+                for (var prop in arrItemLookup) {
+                    var stItemRefId = arrItemLookup[prop]
+                    break;
                 }
+            }
 
-                var arrReturnSearchResults = [];
-                var objSavedSearch;
-                var intMaxResults = 1000;
-                if (stSearchId) {
-                    objSavedSearch = search.load({
-                        id: stSearchId
-                    });
+            return stItemRefId;
+        }
+        //get Transaction Date required for contract create
+        exports.getTransactionDate = function (stDate) {
+            var stTimeDate = new Date(stDate);
+            return stTimeDate.getTime() / 1000;
+        };
+        //get Current Date in epoch format required for contract create
+        exports.getepochDate = function () {
+            var stTimeDate = new Date();
+            return stTimeDate.getTime();
+        };
+        //get Customer Info required for contract create
+        exports.getCustomerInfo = function (stCustomerId) {
+            var objCustomerRecord = record.load({
+                type: 'customer',
+                id: stCustomerId
+            });
+            var objCustomerInfo = {
+                "email": objCustomerRecord.getValue({ fieldId: 'email' }),
+                "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
+                "bill_address1": objCustomerRecord.getValue({ fieldId: 'billaddr1' }),
+                "bill_address2": objCustomerRecord.getValue({ fieldId: 'billaddr2' }),
+                "bill_city": objCustomerRecord.getValue({ fieldId: 'billcity' }),
+                "bill_state": objCustomerRecord.getValue({ fieldId: 'billstate' }),
+                "bill_zip": objCustomerRecord.getValue({ fieldId: 'billzip' }),
+                "bill_country": "US",
+                "ship_address1": objCustomerRecord.getValue({ fieldId: 'shipaddr1' }),
+                "ship_address2": objCustomerRecord.getValue({ fieldId: 'shipaddr2' }),
+                "ship_city": objCustomerRecord.getValue({ fieldId: 'shipcity' }),
+                "ship_state": objCustomerRecord.getValue({ fieldId: 'shipstate' }),
+                "ship_zip": objCustomerRecord.getValue({ fieldId: 'shipzip' }),
+                "ship_country": "US",
+            }
+            return objCustomerInfo;
+        };
+        //get Item Purchase Price
+        exports.getPurchasePrice = function (stItemId) {
+            var arrFilters = [];
+            arrFilters.push(search.createFilter({ name: 'internalid', operator: 'is', values: [stItemId] }));
+            var arrColumns = [];
+            arrColumns.push(search.createColumn({ name: 'baseprice' }));
+
+            var arrSearchResults = exports.search('item', null, arrFilters, arrColumns);
+            var stPurchasePrice;
+            if (arrSearchResults.length) {
+                stPurchasePrice = arrSearchResults[0].getValue({ name: 'baseprice' });
+            }
+            return stPurchasePrice;
+        };
+        /***********************************Support Functions********************************************/
+        /**
+         * Performs empty validations
+         */
+        exports.objectIsEmpty = function (obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop))
+                    return false;
+            }
+            return true;
+        };
+        exports.stringIsEmpty = function (stValue) {
+            if ((stValue == '') || (stValue == null) || (stValue == undefined)) {
+                return true;
+            }
+            return false;
+        };
+        /**
+         * Createa Custom Error Object
+         */
+        exports.createError = function (objErrorDetails) {
+            var objCustomError = error.create({
+                name: objErrorDetails.title,
+                message: objErrorDetails.message,
+                notifyOff: true
+            });
+            return objCustomError;
+        };
+        /**
+         * Performs search with no size limitations
+         */
+        exports.search = function (stRecordType, stSearchId, arrSearchFilter, arrSearchColumn, bUseFilterExpressions, arrSearchSetting) {
+            if (!stRecordType && !stSearchId) {
+                throw 'search: Missing a required argument. Either stRecordType or stSearchId should be provided.';
+            }
+
+            var arrReturnSearchResults = [];
+            var objSavedSearch;
+            var intMaxResults = 1000;
+            if (stSearchId) {
+                objSavedSearch = search.load({
+                    id: stSearchId
+                });
+            }
+            else {
+                objSavedSearch = search.create({
+                    type: stRecordType
+                });
+            }
+
+            // add search filter if one is passed
+            if (arrSearchFilter) {
+                //Use Filter Expressions if that option has been enabled
+                if (bUseFilterExpressions) {
+                    if (stSearchId) {
+                        objSavedSearch.filterExpression = objSavedSearch.filters.concat(arrSearchFilter);
+                    }
+                    else {
+                        objSavedSearch.filterExpression = arrSearchFilter;
+                    }
                 }
                 else {
-                    objSavedSearch = search.create({
-                        type: stRecordType
-                    });
-                }
-
-                // add search filter if one is passed
-                if (arrSearchFilter) {
-                    //Use Filter Expressions if that option has been enabled
-                    if (bUseFilterExpressions) {
-                        if (stSearchId) {
-                            objSavedSearch.filterExpression = objSavedSearch.filters.concat(arrSearchFilter);
-                        }
-                        else {
-                            objSavedSearch.filterExpression = arrSearchFilter;
-                        }
-                    }
-                    else {
-                        if (stSearchId) {
-                            objSavedSearch.filters = objSavedSearch.filters.concat(arrSearchFilter);
-                        }
-                        else {
-                            objSavedSearch.filters = arrSearchFilter;
-                        }
-                    }
-                }
-                // add search column if one is passed
-                if (arrSearchColumn) {
                     if (stSearchId) {
-                        objSavedSearch.columns = objSavedSearch.columns.concat(arrSearchColumn);
+                        objSavedSearch.filters = objSavedSearch.filters.concat(arrSearchFilter);
                     }
                     else {
-                        objSavedSearch.columns = arrSearchColumn;
+                        objSavedSearch.filters = arrSearchFilter;
                     }
                 }
-                // add search settings if one is passed
-                if (arrSearchSetting && arrSearchSetting.length > 0) {
-                    if (stSearchId) {
-                        objSavedSearch.settings = objSavedSearch.columns.concat(arrSearchSetting);
-                    }
-                    else {
-                        objSavedSearch.settings = arrSearchSetting;
-                    }
+            }
+            // add search column if one is passed
+            if (arrSearchColumn) {
+                if (stSearchId) {
+                    objSavedSearch.columns = objSavedSearch.columns.concat(arrSearchColumn);
                 }
+                else {
+                    objSavedSearch.columns = arrSearchColumn;
+                }
+            }
+            // add search settings if one is passed
+            if (arrSearchSetting && arrSearchSetting.length > 0) {
+                if (stSearchId) {
+                    objSavedSearch.settings = objSavedSearch.columns.concat(arrSearchSetting);
+                }
+                else {
+                    objSavedSearch.settings = arrSearchSetting;
+                }
+            }
 
-                var objResultSet = objSavedSearch.run();
-                var intSearchIndex = 0;
-                var arrResultSlice = null;
-                do {
-                    arrResultSlice = objResultSet.getRange(intSearchIndex, intSearchIndex + intMaxResults);
-                    if (arrResultSlice == null) {
-                        break;
-                    }
-                    arrReturnSearchResults = arrReturnSearchResults.concat(arrResultSlice);
-                    intSearchIndex = arrReturnSearchResults.length;
+            var objResultSet = objSavedSearch.run();
+            var intSearchIndex = 0;
+            var arrResultSlice = null;
+            do {
+                arrResultSlice = objResultSet.getRange(intSearchIndex, intSearchIndex + intMaxResults);
+                if (arrResultSlice == null) {
+                    break;
                 }
-                while (arrResultSlice.length >= intMaxResults);
+                arrReturnSearchResults = arrReturnSearchResults.concat(arrResultSlice);
+                intSearchIndex = arrReturnSearchResults.length;
+            }
+            while (arrResultSlice.length >= intMaxResults);
 
-                return arrReturnSearchResults;
-            };
-            return exports;
-        });
+            return arrReturnSearchResults;
+        };
+        return exports;
+    });
