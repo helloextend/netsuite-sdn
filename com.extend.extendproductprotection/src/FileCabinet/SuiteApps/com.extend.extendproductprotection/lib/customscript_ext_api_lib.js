@@ -216,11 +216,11 @@
  * UPDATE ORDER LINE FULFILLMENT
  * API Documentation: https://docs.extend.com/reference/lineitemsfulfill
  */
-    exports.fulfillOrderLine = function (objOrderDetails, stLineItemId) {
+    exports.fulfillOrderLine = function (objOrderDetails) {
       var config = extendConfig.getConfig();
       try {
         var response = https.post({
-          url: config.domain + '/line-items/' + stLineItemId + '/fulfill',
+          url: config.domain + '/line-items/fulfill',
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,

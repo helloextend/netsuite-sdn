@@ -4,7 +4,7 @@
     </files>
     <objects>
        <path>~/Objects/Fields/*</path>
-    </objects>
+    </objects> 
     <translationimports>
         <path>~/Translations/*</path>
     </translationimports>

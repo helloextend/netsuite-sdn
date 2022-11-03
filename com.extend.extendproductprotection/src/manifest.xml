@@ -24,6 +24,7 @@
       <feature required="false">WORKORDERS</feature>
       <feature required="false">RECEIVABLES</feature>
       <feature required="false">PAYABLES</feature>
+      <feature required="false">MATRIXITEMS</feature>
     </features>
   </dependencies>
 </manifest>

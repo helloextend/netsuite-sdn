@@ -40,6 +40,7 @@
         exports.reduce = function (context) {
             try {
                 log.debug('reduce', '** START **');
+                log.audit('reduce', 'context: ' + context);
 
                 var stFulfillmentId = context.key;
                 log.audit('reduce', 'stFulfillmentId: ' + stFulfillmentId);
