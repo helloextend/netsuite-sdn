@@ -82,7 +82,7 @@ define([
                     columns: refIdValue
                 });
                 for (var prop in arrItemLookup) {
-                    var stItemRefId = arrItemLookup[prop];
+                    var stItemRefId = arrItemLookup[prop][0].text;
                     break;
                 }
             }
@@ -149,7 +149,7 @@ define([
                     });
 
                     for (var prop in arrItemLookup) {
-                        var stItemRefId = arrItemLookup[prop];
+                        var stItemRefId = arrItemLookup[prop][0].text;
                         break;
                     }
                 }

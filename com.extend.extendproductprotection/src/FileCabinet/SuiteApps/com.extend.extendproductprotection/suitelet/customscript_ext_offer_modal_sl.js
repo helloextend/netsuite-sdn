@@ -334,7 +334,7 @@ define([
                  */
                 if (stItemRefId) {
                     try {
-                        var objResponse = api.getPlansByItem(stItemRefId);
+                        var objResponse = api.getOffers(stItemRefId);
                         log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
