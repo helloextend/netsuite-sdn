@@ -19,8 +19,8 @@
      * CREATE PRODUCTS
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products/post
      */
-    exports.createProduct = function (arrProducts, bIsBatch, bIsUpsert) {
-      var config = extendConfig.getConfig();
+    exports.createProduct = function (arrProducts, bIsBatch, bIsUpsert, config) {
+     // var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/products?upsert=' + bIsUpsert + '?batch=' + bIsBatch,
@@ -43,9 +43,9 @@
      * UPDATE PRODUCT
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/put
      */
-    exports.updateProduct = function (objProductDetails, stItemId) {
+    exports.updateProduct = function (objProductDetails, stItemId, config) {
       // log.debug('Extend Product Details', objProductDetails);
-      var config = extendConfig.getConfig();
+     // var config = extendConfig.getConfig();
       try {
         var response = https.put({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -68,8 +68,8 @@
      * GET PRODUCT
      * API Documentation: https://developers.helloextend.com/2020-08-01#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/get
      */
-    exports.getProduct = function (stItemId) {
-      var config = extendConfig.getConfig();
+    exports.getProduct = function (stItemId, config) {
+      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -91,8 +91,8 @@
      * DELETE PRODUCT
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/delete
      */
-    exports.deleteProduct = function (stItemId) {
-      var config = extendConfig.getConfig();
+    exports.deleteProduct = function (stItemId, config) {
+      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -116,8 +116,8 @@
      * GET OFFERS
      * API Documentation: https://developers.extend.com/default#operation/getOffer
      */
-    exports.getOffers= function (stItemId) {
-      var config = extendConfig.getConfig();
+    exports.getOffers= function (stItemId, config) {
+     // var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/offers?storeId=' + config.storeId + '&productId=' + stItemId,
@@ -141,8 +141,8 @@
      * CREATE LEAD
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1stores~1{storeId}~1leads/post
      */
-    exports.createLead = function (objLeadDetails) {
-      var config = extendConfig.getConfig();
+    exports.createLead = function (objLeadDetails, config) {
+     // var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/leads',
@@ -165,8 +165,8 @@
      * GET LEAD OFFERS
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1leads~1{leadToken}~1offers/get
      */
-    exports.getLeadOffers = function (objLeadDetails) {
-      var config = extendConfig.getConfig();
+    exports.getLeadOffers = function (objLeadDetails, config) {
+      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/leads/' + config.storeId + '/offers',
@@ -191,8 +191,8 @@
      * CREATE ORDER
      * API Documentation: https://docs.extend.com/reference/orderscreate
      */
-     exports.createOrder = function (objOrderDetails) {
-      var config = extendConfig.getConfig();
+     exports.createOrder = function (objOrderDetails, config) {
+     // var config = extendConfig.getConfig();
 
       try {
         var response = https.post({
@@ -216,8 +216,8 @@
  * UPDATE ORDER LINE FULFILLMENT
  * API Documentation: https://docs.extend.com/reference/lineitemsfulfill
  */
-    exports.fulfillOrderLine = function (objOrderDetails) {
-      var config = extendConfig.getConfig();
+    exports.fulfillOrderLine = function (objOrderDetails, config) {
+     // var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/line-items/fulfill',
@@ -241,8 +241,8 @@
      * REFUND CONTRACT
      * API Documentation: https://docs.extend.com/reference/refundscreate
      */
-    exports.refundContract = function (objRefundDetails) {
-      var config = extendConfig.getConfig();
+    exports.refundContract = function (objRefundDetails, config) {
+    //  var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/refunds',
@@ -265,8 +265,8 @@
      * GET REFUND QUOTE
      * API Documentation: https://docs.extend.com/reference/refundsget
      */
-         exports.getRefundQuote = function (objRefundDetails) {
-          var config = extendConfig.getConfig();
+         exports.getRefundQuote = function (objRefundDetails, config) {
+         // var config = extendConfig.getConfig();
           try {
             var response = https.get({
               url: config.domain + '/refunds',
@@ -289,8 +289,8 @@
      * REQUEST REFUND
      * API Documentation: https://docs.extend.com/reference/refundscreate
      */
- exports.requestRefund = function (objRefundDetails) {
-  var config = extendConfig.getConfig();
+ exports.requestRefund = function (objRefundDetails, config) {
+ // var config = extendConfig.getConfig();
   try {
     var response = https.post({
       url: config.domain + '/refunds',

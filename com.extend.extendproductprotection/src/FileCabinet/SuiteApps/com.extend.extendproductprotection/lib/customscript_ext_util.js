@@ -18,7 +18,7 @@ define([
          * Order Functions
          */
         //create extend order
-        exports.createExtendOrder = function (objSalesOrderRecord) {
+        exports.createExtendOrder = function (objSalesOrderRecord, objExtendConfig) {
             log.audit('EXTEND UTIL _createExtendOrder:', '**ENTER**');
             log.audit('EXTEND UTIL _createExtendOrder: SO ID', objSalesOrderRecord.id);
             var objExtendOrderRequestJSON = {};
@@ -39,7 +39,7 @@ define([
             objExtendOrderRequestJSON = exports.buildExtendOrderJSON(objExtendData);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendOrderRequestJSON', objExtendOrderRequestJSON);
             //call api
-            var objExtendResponse = EXTEND_API.createOrder(objExtendOrderRequestJSON);
+            var objExtendResponse = EXTEND_API.createOrder(objExtendOrderRequestJSON, config);
             log.audit('EXTEND UTIL _createExtendOrder: Extend Response Object: ', objExtendResponse);
             //handle response
             if (objExtendResponse.code === 201) {
@@ -86,7 +86,7 @@ define([
                 for (var i = 0; i < objExtendData[key].quantity; i++) {
 
                     //call api
-                    var objExtendResponse = EXTEND_API.fulfillOrderLine(objExtendFulfillRequestJSON);
+                    var objExtendResponse = EXTEND_API.fulfillOrderLine(objExtendFulfillRequestJSON, config);
                     log.audit('EXTEND UTIL _fulfillExtendOrder: Extend Response Object: ', objExtendResponse);
                     //handle response
                     if (objExtendResponse.code === 201) {

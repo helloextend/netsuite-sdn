@@ -15,9 +15,11 @@ define([
     'N/runtime',
     'N/record',
     'N/search',
-    '../lib/customscript_ext_util'
+    '../lib/customscript_ext_util',
+    '../lib/customscript_ext_config_lib'
+
 ],
-    function (runtime, record, search, EXTEND_UTIL) {
+    function (runtime, record, search, EXTEND_UTIL, EXTEND_CONFIG) {
         var exports = {};
 
         exports.getInputData = function () {
@@ -49,7 +51,8 @@ define([
                     id: stSalesOrderId
                 });
                 // Get Extend Details from Sales Order
-                objExtendData = EXTEND_UTIL.createExtendOrder(objSalesOrderRecord);
+                var objExtendConfig = EXTEND_CONFIG.getConfig();
+                objExtendData = EXTEND_UTIL.createExtendOrder(objSalesOrderRecord, objExtendConfig);
 
             } catch (e) {
                 log.error('reduce', 'key: ' + context.key + ' error: ' + e);
