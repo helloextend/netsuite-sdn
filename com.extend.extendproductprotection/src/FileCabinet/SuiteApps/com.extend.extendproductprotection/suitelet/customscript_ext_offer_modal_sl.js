@@ -18,9 +18,10 @@ define([
     'N/runtime',
     'N/http',
     'N/error',
-    '../lib/customscript_ext_api_lib'
+    '../lib/customscript_ext_api_lib',
+    '../lib/customscript_ext_config_lib'
 ],
-    function (ui, runtime, http, error, api) {
+    function (ui, runtime, http, error, api, EXTEND_CONFIG) {
 
         var exports = {};
 
@@ -334,11 +335,12 @@ define([
                  */
                 if (stItemRefId) {
                     try {
-                        var objResponse = api.getOffers(stItemRefId);
+                        var config = EXTEND_CONFIG.getConfig();
+                        var objResponse = api.getOffers(stItemRefId, config);
                         log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
+
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
-
                             log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
 
                             var objPlans = objResponseBody.plans;
@@ -350,7 +352,6 @@ define([
                             if (arrPlans.length == 0) {
                                 var arrPlans = objPlans.adh;
                             }
-
                             log.debug('arrPlans', arrPlans);
 
                             //Populate Sublist Values
