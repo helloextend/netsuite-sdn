@@ -84,14 +84,17 @@ define([
                 log.audit('EXTEND UTIL _fulfillExtendOrder: objExtendFulfillRequestJSON', objExtendFulfillRequestJSON);
                 // Create contract call for quantity fulfilled on the Extend item 
                 for (var i = 0; i < objExtendData[key].quantity; i++) {
-
+                    //get extend contract array for line
+                    log.debug('EXTEND UTIL _fulfillExtendOrder: objExtendFulfillRequestJSON',objExtendData[key].contractIds);
                     //call api
                     var objExtendResponse = EXTEND_API.fulfillOrderLine(objExtendFulfillRequestJSON, objExtendConfig);
                     log.audit('EXTEND UTIL _fulfillExtendOrder: Extend Response Object: ', objExtendResponse);
                     //handle response
                     if (objExtendResponse.code === 201) {
                         var objExtendResponseBody = JSON.parse(objExtendResponse.body);
-                        exports.handleFulfillResponse(objExtendResponseBody, objSalesOrderRecord);
+                        //push new contract id to contracts array
+                        objExtendData[key].contractIds.push();
+
                         //submit fields to IF
                         record.submitFields({
                             type: record.Type.ITEM_FULFILLMENT,
@@ -129,6 +132,8 @@ define([
                         var stNoteId = objNoteRecord.save();
                     }
                 }
+                //set contract column on SO line
+                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendData[key].contractIds) });
             }
             objFulfillmentRecord.save();
 
@@ -150,16 +155,13 @@ define([
                 if (stExtendItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get qty of contracts created & compare to extend item qty
-                    var stContractID = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i });
-                    log.debug('_getExtendData: stContractID', stContractID + '|' + typeof arrContracyQty);
-                    var arrContracyQty = JSON.parse(stContractID);
-                    log.debug('_getExtendData: arrContracyQty', arrContracyQty + '|' + typeof arrContracyQty);
-                    var stContractQty = arrContracyQty.length;
-                    log.debug('_getExtendData: stContractQty', stContractQty + '|' + typeof arrContracyQty);
+                    var arrContracyQty = JSON.parse(objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i }));
+                    log.debug('_getExtendData: stContractID', arrContracyQty + '|' + typeof arrContracyQty);
+                    objExtendItemData[stUniqueKey].contractIds = arrContracyQty;
 
                     var stExtendItemQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
 
-                    if (stContractQty < stExtendItemQty) {
+                    if (arrContracyQty.length < stExtendItemQty) {
 
                         //get related item from extend line
                         var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
@@ -177,7 +179,6 @@ define([
                                     objExtendItemData[stUniqueKey].quantity = Math.min(stRelatedItemQtyFulfilled, (stExtendItemQty - stContractQty));
                                     objExtendItemData[stUniqueKey].line = i;
                                     objExtendItemData[stUniqueKey].lineItemID = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: i });
-
                                 }
                             }
                         }
