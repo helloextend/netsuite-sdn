@@ -50,16 +50,21 @@ define([
                 var stSalesOrderId = contextValues.values.createdfrom.value;
                 log.audit('stSalesOrderId | stFulfillmentId', stSalesOrderId + '|' + stFulfillmentId);
 
-                context.write({
-                    key: stSalesOrderId,
-                    value: stFulfillmentId
+                //Load associated Saled Order Record
+                var objSalesOrderRecord = record.load({
+                    type: 'salesorder',
+                    id: stSalesOrderId
                 });
+                // Get Extend Details from Fulfillment
+                var objExtendConfig = EXTEND_CONFIG.getConfig();
+                objExtendData = EXTEND_UTIL.fulfillExtendOrder(objSalesOrderRecord, stFulfillmentId, objExtendConfig);
+
 
             } catch (e) {
                 log.error('map', 'error: ' + e);
                 var id = record.submitFields({
-                    type: record.Type.SALES_ORDER,
-                    id: stSalesOrderId,
+                    type: record.Type.ITEM_FULFILLMENT,
+                    id: stFulfillmentId,
                     values: {
                         'custbody_ext_process_error': true
                     },
@@ -72,52 +77,10 @@ define([
                 var objNoteRecord = record.create({
                     type: record.Type.NOTE,
                 })
-                objNoteRecord.setValue('transaction', stSalesOrderId);
-                objNoteRecord.setValue('title', stSalesOrderId);
+                objNoteRecord.setValue('transaction', stFulfillmentId);
+                objNoteRecord.setValue('title', stFulfillmentId);
                 objNoteRecord.setValue('note', e.message);
                 objNoteRecord.save();
-
-            }
-        }
-        exports.reduce = function (context) {
-            try {
-                log.debug('reduce', '** START **');
-                log.audit('reduce', 'context: ' + context);
-
-                var stSalesOrderId = context.key;
-                log.audit('reduce', 'stSalesOrderId: ' + stSalesOrderId);
-                var stFulfillmentId = context.value;
-                //Load associated Saled Order Record
-                var objSalesOrderRecord = record.load({
-                    type: 'salesorder',
-                    id: stSalesOrderId
-                });
-                // Get Extend Details from Fulfillment
-                var objExtendConfig = EXTEND_CONFIG.getConfig();
-                objExtendData = EXTEND_UTIL.fulfillExtendOrder(objSalesOrderRecord, stFulfillmentId, objExtendConfig);
-
-            } catch (e) {
-                log.error('reduce', 'key: ' + context.key + ' error: ' + e);
-                record.submitFields({
-                    type: record.Type.ITEM_FULFILLMENT,
-                    id: stFulfillmentId,
-                    values: {
-                        'custbody_ext_process_error': true
-                    },
-                    options: {
-                        enableSourcing: false,
-                        ignoreMandatoryFields: true
-                    }
-                });
-                // create user note attached to record
-                var objNoteRecord = record.create({
-                    type: record.Type.NOTE,
-                })
-                objNoteRecord.setValue('transaction', stFulfillmentId);
-                objNoteRecord.setValue('title', 'Extend Error Order Create');
-                objNoteRecord.setValue('note', JSON.stringify(e.message));
-                var stNoteId = objNoteRecord.save();
-                log.debug('reduce', 'stNoteId: ' + stNoteId);
 
             }
         }
