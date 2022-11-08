@@ -138,9 +138,54 @@ define([
             objFulfillmentRecord.save();
 
         };
-        exports.refundExtendOrder = function (objRefundRecord) {
+
+        //refund item by line item transaction id
+        exports.refundExtendOrder = function (objRefundData) {
+            log.audit('EXTEND UTIL _refundExtendOrder:', '**ENTER**');
+            log.audit('EXTEND UTIL _refundExtendOrder: objRefundData', JSON.stringify(objRefundData));
+
+            var config = EXTEND_CONFIG.getConfig();
+            var objLineToRefund = {'lineItemTransactionId': objRefundData['lineItemTransactionId']}
+            var objExtendResponse = EXTEND_API.refundContract(objLineToRefund, config);
+            log.audit('EXTEND UTIL _refundExtendOrder: Extend Response Object: ', objExtendResponse);
+
+            var objRefundedRecord = record.load({
+                    type: objRefundData.TYPE,
+                    id: objRefundData.ID
+                });
+
+            //handle response
+            if (objExtendResponse.code === 201) {
+                var objExtendResponseBody = JSON.parse(objExtendResponse.body);
+                log.debug('EXTEND UTIL _refundExtendOrder: objExtendResponseBody: ', JSON.stringify(objExtendResponseBody));
+
+                // exports.handleOrderResponse(objExtendResponseBody, objRefundedRecord);
+
+                //make transaction as extend order processed
+                objRefundedRecord.setValue({ fieldId: 'custbody_ext_order_create', value: true });
+                // var stExtendOrderId = objExtendResponseBody.id;
+
+                // log.debug('EXTEND UTIL _refundExtendOrder: stExtendOrderId: ', stExtendOrderId);
+                // objRefundedRecord.setValue({ fieldId: 'custbody_ext_order_id', value: stExtendOrderId });
+
+            } else {
+                log.error('EXTEND UTIL _refundExtendOrder', objExtendResponse);
+                objRefundedRecord.setValue({ fieldId: 'custbody_ext_process_error', value: true });
+                // create user note attached to record                 
+                var objNoteRecord = record.create({
+                    type: record.Type.NOTE,
+                })
+                objNoteRecord.setValue('transaction', objRefundedRecord.id);
+                objNoteRecord.setValue('title', 'Extend Refund Error');
+                objNoteRecord.setValue('note', JSON.stringify(objExtendResponse.body));
+                var stNoteId = objNoteRecord.save();
+            }
+
+            objRefundedRecord.save();
+
 
         };
+
         /***********************************Support Functions********************************************/
         exports.getFulfillmentData = function (objNewRecord) {
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');

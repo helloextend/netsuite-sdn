@@ -37,25 +37,49 @@
                 log.error('getInputData', 'error: ' + e);
             }
         }
+
         exports.reduce = function (context) {
             try {
                 log.debug('reduce', '** START **');
-                log.audit('reduce', 'context: ' + context);
 
                 var stRefundId = context.key;
-                var stRefundType = context.values.type;
                 log.audit('reduce', 'stRefundId: ' + stRefundId);
+
+                var objContextValues = JSON.parse(context.values[0]);
+                log.audit('reduce', 'objContextValues: ' + JSON.stringify(objContextValues));
+
+                var stRefundType = objContextValues['recordType']
                 log.audit('reduce', 'stRefundType: ' + stRefundType);
+
+                var stLineTranID = objContextValues.values.custcol_ext_so_line
+                log.audit('reduce', 'stLineTranID: ' + stLineTranID);
+
+                var stLineSequenceNum = objContextValues.values.linesequencenumber - 1;
+                log.audit('reduce', 'stLineSequenceNum: ' + stLineSequenceNum);
+
+                var objRefundData = {
+                    'ID' : stRefundId,
+                    'TYPE' : stRefundType,
+                    'lineItemTransactionId' : stLineTranID,
+                    'LINE_NUM' : stLineSequenceNum 
+                }
+
+                //call to refund by line item transaction id
+                objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundData);
+
                 //Load associated Saled Order Record
-                var objRefundRecord = record.load({
-                    type: stRefundType,
-                    id: stRefundId
-                });
+                // var objRefundRecord = record.load({
+                //     type: stRefundType,
+                //     id: stRefundId
+                // });
+
+                // log.debug('reduce', 'objRefundRecord - '+ JSON.stringify(objRefundRecord));
                 // Get Extend Details from Sales Order
-                objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundRecord);
+                // objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundRecord);
 
             } catch (e) {
                 log.error('reduce', 'key: ' + context.key + ' error: ' + e);
+
                 record.submitFields({
                     type: stRefundType,
                     id: stRefundId,
@@ -67,10 +91,12 @@
                         ignoreMandatoryFields: true
                     }
                 });
+
                 // create user note attached to record
                 var objNoteRecord = record.create({
                     type: record.Type.NOTE,
                 })
+
                 objNoteRecord.setValue('transaction', stFulfillmentId);
                 objNoteRecord.setValue('title', 'Extend Error Order Create');
                 objNoteRecord.setValue('note', JSON.stringify(e.message));
@@ -79,6 +105,7 @@
 
             }
         }
+
         exports.summarize = function (summary) {
             log.audit('summarize', '** START **');
             try {
@@ -87,6 +114,7 @@
                     mapKeys.push(key);
                     return true;
                 });
+
                 if (mapKeys.length < 1) {
                     log.debug('summarize', 'No results were processed');
                 }
@@ -96,8 +124,6 @@
                 log.error('summarize', 'error: ' + e);
             }
         }
-
-
 
         return exports;
     });
