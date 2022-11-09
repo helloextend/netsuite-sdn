@@ -118,10 +118,47 @@ define([
             log.audit('EXTEND UTIL _refundExtendOrder:', '**ENTER**');
             log.audit('EXTEND UTIL _refundExtendOrder: objRefundData', JSON.stringify(objRefundData));
 
-            var config = EXTEND_CONFIG.getConfig();
-            var objLineToRefund = {'lineItemTransactionId': objRefundData['lineItemTransactionId']}
-            var objExtendResponse = EXTEND_API.refundContract(objLineToRefund, config);
-            log.audit('EXTEND UTIL _refundExtendOrder: Extend Response Object: ', objExtendResponse);
+            var intQuantityToRefund = parseInt(objRefundData['QTY']);
+            var arrActiveIDs = objRefundData['activeIDs'];
+            var arrCanceledIDs = objRefundData['canceledIDs'];
+            // var objLineToRefund = {'lineItemTransactionId' : objRefundData['lineItemTransactionId']}
+            // var objContractToRefund = {'contractId' : objRefundData['lineItemTransactionId']}
+
+            //check if contract id has been canceled
+            function checkIfCanceled(contractToCancel, arrCanceledIDs){
+                return arrCanceledIDs.length >0 ? arrCanceledIDs.includes(contractToCancel) : false;
+            }
+
+            var intContractsCanceled = arrCanceledIDs ? arrCanceledIDs.length : 0;
+            var intContractsStillActive = arrActiveIDs ? arrActiveIDs.length - intContractsCanceled : 0;
+
+            if(intContractsStillActive>0){
+                log.debug('refundExtendOrder', "There is/are still "+intContractsStillActive+" active contract(s).");
+
+                var config = EXTEND_CONFIG.getConfig();
+
+                for (var index = 0; index < arrActiveIDs.length; index++) {
+                    var contractId = arrActiveIDs[index];
+                    var bIsCanceled = checkIfCanceled(contractId, arrCanceledIDs);
+    
+                    if(bIsCanceled){
+                        log.debug('refundExtendOrder', contractId + " has been canceled.");
+                        continue;
+                    }else{
+                        log.debug('refundExtendOrder', "Attempting to cancel "+contractId);
+                        var objContractToRefund = {'contractId' : contractId}
+                        var objExtendResponse = EXTEND_API.refundContract(objContractToRefund, config);
+
+                        if (objExtendResponse.code === 201) {
+                            arrCanceledIDs.push(contractId);
+                            log.debug("refundExtendOrder", JSON.stringify(arrCanceledIDs));
+                        }
+        
+                    }
+                }
+            }else{
+                log.error('refundExtendOrder', "All contracts have been refunded/canceled.");
+            }
 
             var objRefundedRecord = record.load({
                     type: objRefundData.TYPE,
@@ -133,8 +170,20 @@ define([
                 var objExtendResponseBody = JSON.parse(objExtendResponse.body);
                 log.debug('EXTEND UTIL _refundExtendOrder: objExtendResponseBody: ', JSON.stringify(objExtendResponseBody));
 
+                var lineNumber = objRefundedRecord.findSublistLineWithValue({
+                    sublistId: 'item',
+                    fieldId: 'lineuniquekey',
+                    value: objRefundData['UNIQUE_KEY']
+                });
+                log.debug("refundExtendOrder", "lineNumber - "+ lineNumber)
                 // exports.handleOrderResponse(objExtendResponseBody, objRefundedRecord);
 
+                objRefundedRecord.setSublistValue({
+                    sublistId: 'item',
+                    fieldId: 'custcol_ext_canceled_contract_ids',
+                    line: lineNumber,
+                    value: JSON.stringify(arrCanceledIDs)
+                });
                 //make transaction as extend order processed
                 objRefundedRecord.setValue({ fieldId: 'custbody_ext_order_create', value: true });
                 // var stExtendOrderId = objExtendResponseBody.id;
@@ -291,7 +340,6 @@ define([
             objExtendData.ship_country = objShipAddress.country;
             return objExtendData;
         };
-
         exports.getSalesOrderItemInfo = function (objSalesOrderRecord) {
             //////////////////////////SUPPORT FUNCTIONS///////////////////////////
             var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
@@ -424,7 +472,7 @@ define([
                 'lineItemTransactionId': objValues.lineItemID
             }
             return objJSON;
-        }
+        };
         /***********************************Support Functions********************************************/
         //get Address Subrecord fields from transaction 
         exports.getAddress = function (objSalesOrderRecord, addressField) {
@@ -452,7 +500,7 @@ define([
                 })
             };
             return objAddress;
-        }
+        };
         //get Item's reference ID 
         exports.getItemRefId = function (stItemId) {
             var config = EXTEND_CONFIG.getConfig();
@@ -473,7 +521,7 @@ define([
             }
 
             return stItemRefId;
-        }
+        };
         //get Transaction Date required for contract create
         exports.getTransactionDate = function (stDate) {
             var stTimeDate = new Date(stDate);

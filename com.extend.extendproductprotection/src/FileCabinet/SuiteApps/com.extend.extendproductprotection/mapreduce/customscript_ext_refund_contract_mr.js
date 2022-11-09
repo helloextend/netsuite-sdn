@@ -43,25 +43,39 @@
                 log.debug('reduce', '** START **');
 
                 var stRefundId = context.key;
-                log.audit('reduce', 'stRefundId: ' + stRefundId);
+                log.debug('reduce', 'stRefundId: ' + stRefundId);
 
                 var objContextValues = JSON.parse(context.values[0]);
-                log.audit('reduce', 'objContextValues: ' + JSON.stringify(objContextValues));
+                log.debug('reduce', 'objContextValues: ' + JSON.stringify(objContextValues));
 
                 var stRefundType = objContextValues['recordType']
-                log.audit('reduce', 'stRefundType: ' + stRefundType);
+                log.debug('reduce', 'stRefundType: ' + stRefundType);
 
-                var stLineTranID = objContextValues.values.custcol_ext_so_line
-                log.audit('reduce', 'stLineTranID: ' + stLineTranID);
+                var stLineUniqueKey = objContextValues.values.lineuniquekey;
+                log.debug('reduce', 'stLineUniqueKey: ' + stLineUniqueKey);
 
-                var stLineSequenceNum = objContextValues.values.linesequencenumber - 1;
-                log.audit('reduce', 'stLineSequenceNum: ' + stLineSequenceNum);
+                var stQuantityToRefund = objContextValues.values.quantity
+                log.debug('reduce', 'stQuantityToRefund: ' + stQuantityToRefund);
+                
+                var stLineTranID = objContextValues.values.custcol_ext_line_id
+                log.debug('reduce', 'stLineTranID: ' + stLineTranID);
+
+                var arrActiveIDs = objContextValues.values.custcol_ext_contract_id;
+                log.debug('reduce', 'arrActiveIDs: ' + arrActiveIDs + " type - "+typeof arrActiveIDs);
+                arrActiveIDs = arrActiveIDs ? JSON.parse(arrActiveIDs) : [];
+
+                var arrCanceledIDs = objContextValues.values.custcol_ext_canceled_contract_ids;
+                log.debug('reduce', 'arrCanceledIDs: ' + arrCanceledIDs + " type - "+typeof arrCanceledIDs);
+                arrCanceledIDs = arrCanceledIDs ? JSON.parse(arrCanceledIDs) : [];
 
                 var objRefundData = {
                     'ID' : stRefundId,
                     'TYPE' : stRefundType,
+                    'UNIQUE_KEY' : stLineUniqueKey,
+                    'QTY' : stQuantityToRefund,
                     'lineItemTransactionId' : stLineTranID,
-                    'LINE_NUM' : stLineSequenceNum 
+                    'activeIDs' : arrActiveIDs,
+                    'canceledIDs' : arrCanceledIDs
                 }
 
                 //call to refund by line item transaction id

@@ -200,7 +200,8 @@
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json;version=' + config.version
+            'Accept': 'application/json;version=' + config.version,
+            'X-Idempotency-Key': exports.generateUUID()
           },
           body: JSON.stringify(objOrderDetails),
         });
@@ -219,12 +220,16 @@
     exports.fulfillOrderLine = function (objOrderDetails, config) {
      // var config = extendConfig.getConfig();
       try {
+        var guid = exports.generateUUID();
+        log.debug('guid', guid);
+
         var response = https.post({
           url: config.domain + '/line-items/fulfill',
           headers: {
             'Content-Type': 'application/json',
             'X-Extend-Access-Token': config.key,
-            'Accept': 'application/json;version=' + config.version
+            'Accept': 'application/json;version=' + config.version,
+            'X-Idempotency-Key' : exports.generateUUID()
           },
           body: JSON.stringify(objOrderDetails),
         });
@@ -243,6 +248,9 @@
      */
     exports.refundContract = function (objRefundDetails, config) {
     //  var config = extendConfig.getConfig();
+      
+      log.debug('requestRefund', "objRefundDetails - "+JSON.stringify(objRefundDetails))
+
       try {
         var response = https.post({
           url: config.domain + '/refunds',
@@ -309,6 +317,21 @@
     return;
   }
 };
+exports.generateUUID = function () { 
+  var d = new Date().getTime();//Timestamp
+  var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16;//random number between 0 and 16
+      if(d > 0){//Use timestamp until depleted
+          r = (d + r)%16 | 0;
+          d = Math.floor(d/16);
+      } else {//Use microseconds since page-load if supported
+          r = (d2 + r)%16 | 0;
+          d2 = Math.floor(d2/16);
+      }
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
 
     return exports;
   });
