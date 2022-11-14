@@ -248,6 +248,9 @@
      */
     exports.refundContract = function (objRefundDetails, config) {
     //  var config = extendConfig.getConfig();
+      
+      log.debug('requestRefund', "objRefundDetails - "+JSON.stringify(objRefundDetails))
+
       try {
         var response = https.post({
           url: config.domain + '/refunds',
