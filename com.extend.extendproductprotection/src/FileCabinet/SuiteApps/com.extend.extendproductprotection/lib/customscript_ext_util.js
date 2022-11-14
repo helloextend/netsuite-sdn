@@ -32,14 +32,14 @@ define([
             var objExtendItemData = exports.getSalesOrderItemInfo(objSalesOrderRecord);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendItemData', objExtendItemData);
             //format items
-            objExtendData.lineItems = exports.buildExtendItemJSON(objExtendItemData);
+            objExtendData.lineItems = exports.buildExtendItemJSON(objExtendItemData, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendData', objExtendData);
 
             //build order json obj
-            objExtendOrderRequestJSON = exports.buildExtendOrderJSON(objExtendData);
+            objExtendOrderRequestJSON = exports.buildExtendOrderJSON(objExtendData, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendOrderRequestJSON', objExtendOrderRequestJSON);
             //call api
-            var objExtendResponse = EXTEND_API.createOrder(objExtendOrderRequestJSON, config);
+            var objExtendResponse = EXTEND_API.createOrder(objExtendOrderRequestJSON, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: Extend Response Object: ', objExtendResponse);
             //handle response
             if (objExtendResponse.code === 201) {
@@ -67,14 +67,14 @@ define([
             objSalesOrderRecord.save();
         };
         //fulfill items on order
-        exports.fulfillExtendOrder = function (objFulfillmentRecord) {
+        exports.fulfillExtendOrder = function (objSalesOrderRecord, stFulfillmentId, objExtendConfig) {
             log.audit('EXTEND UTIL _fulfillExtendOrder:', '**ENTER**');
-            log.audit('EXTEND UTIL _fulfillExtendOrder: IF ID', objFulfillmentRecord.id);
+            log.audit('EXTEND UTIL _fulfillExtendOrder: SO ID', objSalesOrderRecord.id + '|' + stFulfillmentId);
 
             //build order data obj
             var objExtendData = {};
             //get fulfillment data
-            objExtendData = exports.getFulfillmentData(objFulfillmentRecord);
+            objExtendData = exports.getFulfillmentData(objSalesOrderRecord);
             log.audit('EXTEND UTIL _fulfillExtendOrder: getFulfillmentData objExtendData', objExtendData);
 
             for (key in objExtendData) {
@@ -82,34 +82,65 @@ define([
                 var objExtendFulfillRequestJSON = {};
                 objExtendFulfillRequestJSON = exports.buildExtendFulfillJSON(objExtendData[key]);
                 log.audit('EXTEND UTIL _fulfillExtendOrder: objExtendFulfillRequestJSON', objExtendFulfillRequestJSON);
+                var bSuccess = true;
                 // Create contract call for quantity fulfilled on the Extend item 
                 for (var i = 0; i < objExtendData[key].quantity; i++) {
-
+                    //get extend contract array for line
+                    log.debug('EXTEND UTIL _fulfillExtendOrder: objExtendFulfillRequestJSON', objExtendData[key].contractIds + typeof objExtendData[key].contractIds);
                     //call api
-                    var objExtendResponse = EXTEND_API.fulfillOrderLine(objExtendFulfillRequestJSON, config);
+                    var objExtendResponse = EXTEND_API.fulfillOrderLine(objExtendFulfillRequestJSON, objExtendConfig);
                     log.audit('EXTEND UTIL _fulfillExtendOrder: Extend Response Object: ', objExtendResponse);
                     //handle response
-                    if (objExtendResponse.code === 201) {
+                    if (objExtendResponse.code === 200 || objExtendResponse.code === 201) {
                         var objExtendResponseBody = JSON.parse(objExtendResponse.body);
-                        exports.handleOrderResponse(objExtendResponseBody, objFulfillmentRecord);
-                        //make SO as extend order created
-                        objFulfillmentRecord.setValue({ fieldId: 'custbody_ext_order_create', value: true });
+                        //push new contract id to contracts array
+                        objExtendData[key].contractIds.push(objExtendResponseBody.contractId);
 
                     } else {
+                        bSuccess = false;
                         log.error('EXTEND UTIL _fulfillExtendOrder', objExtendResponse);
-                        objFulfillmentRecord.setValue({ fieldId: 'custbody_ext_process_error', value: true });
+                        //submit fields
+                        record.submitFields({
+                            type: record.Type.ITEM_FULFILLMENT,
+                            id: stFulfillmentId,
+                            values: {
+                                'custbody_ext_process_error': true
+                            },
+                            options: {
+                                enableSourcing: false,
+                                ignoreMandatoryFields: true
+                            }
+                        });
                         // create user note attached to record                 
                         var objNoteRecord = record.create({
                             type: record.Type.NOTE,
                         })
-                        objNoteRecord.setValue('transaction', objFulfillmentRecord.id);
+                        objNoteRecord.setValue('transaction', stFulfillmentId);
                         objNoteRecord.setValue('title', 'Extend Order Create Error');
                         objNoteRecord.setValue('note', JSON.stringify(objExtendResponse));
                         var stNoteId = objNoteRecord.save();
                     }
+                    //submit fields to IF
+                    if(bSuccess){
+                        record.submitFields({
+                            type: record.Type.ITEM_FULFILLMENT,
+                            id: stFulfillmentId,
+                            values: {
+                                'custbody_ext_order_create': true
+                            },
+                            options: {
+                                enableSourcing: false,
+                                ignoreMandatoryFields: true
+                            }
+                        });
+                    }
                 }
+                log.debug('EXTEND UTIL _fulfillExtendOrder: contractIDs', key + '|' + objExtendData[key].contractIds);
+
+                //set contract column on SO line
+                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendData[key].contractIds) });
             }
-            objFulfillmentRecord.save();
+            objSalesOrderRecord.save();
 
         };
 
@@ -161,9 +192,9 @@ define([
             }
 
             var objRefundedRecord = record.load({
-                    type: objRefundData.TYPE,
-                    id: objRefundData.ID
-                });
+                type: objRefundData.TYPE,
+                id: objRefundData.ID
+            });
 
             //handle response
             if (objExtendResponse.code === 201) {
@@ -210,22 +241,27 @@ define([
         };
 
         /***********************************Support Functions********************************************/
-        exports.getFulfillmentData = function (stLineCount, objNewRecord) {
+        exports.getFulfillmentData = function (objNewRecord) {
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');
             var objExtendItemData = {};
 
             var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            var stLineCount = objNewRecord.getLineCount({ sublistId: 'item' });
+
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 //Check if item is one of the configured extend items
                 if (stExtendItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get qty of contracts created & compare to extend item qty
-                    var stContractQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_qty', line: i });
+                    var stContractIDs = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i });
+                     var arrContractIDs = JSON.parse(stContractIDs);
+                     log.debug('_getExtendData: stContractID', arrContractIDs + '|' + typeof arrContractIDs);
+                   // var arrContracyQty = JSON.parse(objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i }));
                     var stExtendItemQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
 
-                    if (stContractQty < stExtendItemQty) {
-
+                    if (arrContractIDs.length < stExtendItemQty) {
+var stContractQty = arrContractIDs.length;
                         //get related item from extend line
                         var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
                         //check for new fulfillments
@@ -242,6 +278,7 @@ define([
                                     objExtendItemData[stUniqueKey].quantity = Math.min(stRelatedItemQtyFulfilled, (stExtendItemQty - stContractQty));
                                     objExtendItemData[stUniqueKey].line = i;
                                     objExtendItemData[stUniqueKey].lineItemID = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: i });
+                                    objExtendItemData[stUniqueKey].contractIds = arrContractIDs;
 
                                 }
                             }
@@ -261,36 +298,45 @@ define([
             var arrLineItems = objExtendResponseBody.lineItems;
             var objExtendResponseData = {};
 
+            log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData: ', objExtendResponseData);
 
             for (var i = 0; i < arrLineItems.length; i++) {
                 log.debug('EXTEND UTIL _createExtendOrder: arrLineItems: ', arrLineItems[i]);
                 var line = arrLineItems[i].lineItemTransactionId;
-                line = line.substring(objSalesOrderRecord.id.toString().length, line.length);
+                // line = line.substring(objSalesOrderRecord.id.toString().length, line.length);
+                line = line.split('-');
+
                 log.debug('EXTEND UTIL _createExtendOrder: line: ', line + '|' + typeof line);
-                stUniqueKey = line;
-                objExtendResponseData[stUniqueKey] = {}
+                stUniqueKey = line[1];
+
+                objExtendResponseData[stUniqueKey] = {};
                 objExtendResponseData[stUniqueKey].contractIds = [];
                 objExtendResponseData[stUniqueKey].leadTokens = [];
-
-                if (arrLineItems[i].type == 'contract') {
-                    var arrContractIds = [];
-                    arrContractIds = objExtendResponseData[stUniqueKey].contractIds;
-                    log.debug('EXTEND UTIL _createExtendOrder:  arrContractIds: ', arrContractIds);
-                    log.debug('EXTEND UTIL _createExtendOrder: contractid arrLineItems: ', arrLineItems[i].id);
-                    if (arrLineItems[i].contractId) {
-                        arrContractIds.push(arrLineItems[i].id)
-                    }
-                    objExtendResponseData[stUniqueKey].contractIds = arrContractIds;
+                objExtendResponseData[stUniqueKey].lineItemTransactionId = arrLineItems[i].lineItemTransactionId;
+                if (line[2]) {
+                    objExtendResponseData[stUniqueKey].extendLine = line[2];
                 }
-                if (arrLineItems[i].type == 'lead') {
-                    var arrLeadIds = [];
-                    arrLeadIds = objExtendResponseData[stUniqueKey].leadTokens;
-                    log.debug('EXTEND UTIL _createExtendOrder:  arrLeadIds: ', arrLeadIds);
-                    log.debug('EXTEND UTIL _createExtendOrder: contractid arrLineItems: ', arrLineItems[i].leadToken);
-                    if (arrLineItems[i].leadToken) {
-                        arrLeadIds.push(arrLineItems[i].leadToken)
+                log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[stUniqueKey]: ', objExtendResponseData[stUniqueKey]);
+
+            }
+            for (var j = 0; j < arrLineItems.length; j++) {
+                log.debug('EXTEND UTIL _createExtendOrder: j loop arrLineItems: ', arrLineItems[j]);
+                var line = arrLineItems[j].lineItemTransactionId;
+                // line = line.substring(objSalesOrderRecord.id.toString().length, line.length);
+                line = line.split('-');
+                stUniqueKey = line[1];
+
+                if (arrLineItems[j].type == 'contract') {
+                    log.debug('EXTEND UTIL _createExtendOrder: j loop contractid arrLineItems: ', arrLineItems[j].contractId);
+                    if (arrLineItems[j].contractId) {
+                        objExtendResponseData[stUniqueKey].contractIds.push(arrLineItems[j].contractId);
                     }
-                    objExtendResponseData[stUniqueKey].leadTokens = arrLeadIds;
+                }
+                if (arrLineItems[j].type == 'lead') {
+                    log.debug('EXTEND UTIL _createExtendOrder: j loop leadTokens arrLineItems: ', arrLineItems[j].leadToken);
+                    if (arrLineItems[j].leadToken) {
+                        objExtendResponseData[stUniqueKey].leadTokens.push(arrLineItems[j].leadToken);
+                    }
                 }
             }
             log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData', objExtendResponseData);
@@ -298,13 +344,17 @@ define([
             for (key in objExtendResponseData) {
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].contractIds: ', key + '|' + objExtendResponseData[key].contractIds);
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].leadTokens: ', key + '|' + objExtendResponseData[key].leadTokens);
+                log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].lineItemTransactionId: ', key + '|' + objExtendResponseData[key].lineItemTransactionId);
 
                 // If Extend contract is created, populate the appropriate custom column field for contracts
                 // on the Sales Order line
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key, value: JSON.stringify(objExtendResponseData[key].leadTokens) });
-                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_so_line', line: key, value: key });
+                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: key, value: objExtendResponseData[key].lineItemTransactionId });
+                if (objExtendResponseData[key].extendLine) {
+                    objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: objExtendResponseData[key].extendLine, value: JSON.stringify(objExtendResponseData[key].contractIds) });
 
+                }
             }
             return objSalesOrderRecord;
 
@@ -362,6 +412,7 @@ define([
 
                     //get related item from extend line
                     var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
+
                     for (var j = 0; j < stLineCount; j++) {
                         var stRelatedItem = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
                         if (stRelatedItem === stExtendItemRefId) {
@@ -374,29 +425,35 @@ define([
                             objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
                             objExtendItemData[stUniqueKey].extend_line = i;
                             objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
-
+                            //set Extend Line Item Transaction ID of related product on Extend Line
+                            objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
+                            var stRelatedItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
+                            objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: i, value: stRelatedItemID });
                         }
                     }
                 } else {
                     // Start building the Extend Order Item Info Object
                     objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                     objExtendItemData[stUniqueKey].itemId = stItemId
-                    objExtendItemData[stUniqueKey].uniqueLine = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: i });
+                    //objExtendItemData[stUniqueKey].uniqueLine = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: i });
                     objExtendItemData[stUniqueKey].line = i;
                     objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
-                    objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + i;
+                    objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
+                    if (objExtendItemData[stUniqueKey].extend_line) {
+                        objExtendItemData[stUniqueKey].lineItemID = objExtendItemData[stUniqueKey].lineItemID + "-" + objExtendItemData[stUniqueKey].extend_line;
+                    }
                 }
 
             }
             return objExtendItemData;
         };
         // Build the Extend API JSON for order lines
-        exports.buildExtendItemJSON = function (objValues) {
+        exports.buildExtendItemJSON = function (objValues, objExtendConfig) {
             //item json
             var lineItems = [];
             for (key in objValues) {
                 //get product refId
-                objValues.refId = exports.getItemRefId(objValues[key].itemId);
+                objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                 var item = {
                     'product': {
                         'id': objValues.refId,
@@ -422,14 +479,14 @@ define([
             return lineItems;
         };
         // Build the Extend API JSON for order creation
-        exports.buildExtendOrderJSON = function (objValues) {
+        exports.buildExtendOrderJSON = function (objValues, config) {
             log.debug('EXTEND UTIL _buildExtendOrderJSON:', '**ENTER**');
 
             // Date is a string and we need to format for extend
             const stTranDate = new Date(objValues.tran_date);
 
             //If Demo use demo email for contracts
-            var config = EXTEND_CONFIG.getConfig();
+            //            var config = EXTEND_CONFIG.getConfig();
             if (config.email) {
                 objValues.email = config.email;
             }
@@ -502,8 +559,8 @@ define([
             return objAddress;
         };
         //get Item's reference ID 
-        exports.getItemRefId = function (stItemId) {
-            var config = EXTEND_CONFIG.getConfig();
+        exports.getItemRefId = function (stItemId, config) {
+            //          var config = EXTEND_CONFIG.getConfig();
             var refIdValue = config.refId;
             var stItemRefId = stItemId;
             if (refIdValue) {

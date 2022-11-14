@@ -23,11 +23,13 @@
             var API_KEY;
             var API_VERSION = 'latest';
             var REF_ID;
-            
+
+            var arrFilters = ["isinactive","is","F"];
+
             var customrecord_ext_configurationSearchObj = search.create({
                 type: "customrecord_ext_configuration",
                 filters:[
-                    ["isinactive","is","F"]
+                    arrFilters
                 ],
                 columns:
                 [

@@ -11,13 +11,15 @@
  *@NScriptType MapReduceScript
  *@ModuleScope Public
  */
- define([
+define([
     'N/runtime',
     'N/record',
     'N/search',
-    '../lib/customscript_ext_util'
+    '../lib/customscript_ext_util',
+    '../lib/customscript_ext_config_lib'
+
 ],
-    function (runtime, record, search, EXTEND_UTIL) {
+    function (runtime, record, search, EXTEND_UTIL, EXTEND_CONFIG) {
         var exports = {};
 
         exports.getInputData = function () {
@@ -37,24 +39,30 @@
                 log.error('getInputData', 'error: ' + e);
             }
         }
-        exports.reduce = function (context) {
-            try {
-                log.debug('reduce', '** START **');
-                log.audit('reduce', 'context: ' + context);
 
-                var stFulfillmentId = context.key;
-                log.audit('reduce', 'stFulfillmentId: ' + stFulfillmentId);
+        exports.map = function (context) {
+            try {
+                log.debug('map', '** START **');
+                log.audit('map  context', context);
+
+                var contextValues = JSON.parse(context.value);
+                var stFulfillmentId = contextValues.id;
+                var stSalesOrderId = contextValues.values.createdfrom.value;
+                log.audit('stSalesOrderId | stFulfillmentId', stSalesOrderId + '|' + stFulfillmentId);
+
                 //Load associated Saled Order Record
-                var objFulfillmentRecord = record.load({
-                    type: record.Type.ITEM_FULFILLMENT,
-                    id: stFulfillmentId
+                var objSalesOrderRecord = record.load({
+                    type: 'salesorder',
+                    id: stSalesOrderId
                 });
-                // Get Extend Details from Sales Order
-                objExtendData = EXTEND_UTIL.fulfillExtendOrder(objFulfillmentRecord);
+                // Get Extend Details from Fulfillment
+                var objExtendConfig = EXTEND_CONFIG.getConfig();
+                objExtendData = EXTEND_UTIL.fulfillExtendOrder(objSalesOrderRecord, stFulfillmentId, objExtendConfig);
+
 
             } catch (e) {
-                log.error('reduce', 'key: ' + context.key + ' error: ' + e);
-                record.submitFields({
+                log.error('map', 'error: ' + e);
+                var id = record.submitFields({
                     type: record.Type.ITEM_FULFILLMENT,
                     id: stFulfillmentId,
                     values: {
@@ -65,15 +73,14 @@
                         ignoreMandatoryFields: true
                     }
                 });
-                // create user note attached to record
+                //create user note attached to record
                 var objNoteRecord = record.create({
                     type: record.Type.NOTE,
                 })
                 objNoteRecord.setValue('transaction', stFulfillmentId);
-                objNoteRecord.setValue('title', 'Extend Error Order Create');
-                objNoteRecord.setValue('note', JSON.stringify(e.message));
-                var stNoteId = objNoteRecord.save();
-                log.debug('reduce', 'stNoteId: ' + stNoteId);
+                objNoteRecord.setValue('title', stFulfillmentId);
+                objNoteRecord.setValue('note', e.message);
+                objNoteRecord.save();
 
             }
         }
