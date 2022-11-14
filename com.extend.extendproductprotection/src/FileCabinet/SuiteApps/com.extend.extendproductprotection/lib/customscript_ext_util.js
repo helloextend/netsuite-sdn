@@ -53,7 +53,7 @@
                         })
                         objNoteRecord.setValue('transaction', objSalesOrderRecord.id);
                         objNoteRecord.setValue('title', 'Extend Contract Create Error | Line ' + key);
-                        objNoteRecord.setValue('note', JOSN.stringify(objExtendResponse));
+                        objNoteRecord.setValue('note', JSON.stringify(objExtendResponse));
                         var stNoteId = objNoteRecord.save();
                     }
                 }
@@ -184,12 +184,12 @@
             var objJSON = {
                 'transactionId': objValues.id,
                 'transactionDate': objValues.tran_date,
-//                'transactionTotal':  objValues.total_amount * 100,
+                'transactionTotal':  objValues.total_amount * 100,
 
-                'transactionTotal': {
-                    'currencyCode': objValues.currency,
-                    'amount': parseInt(objValues.total_amount * 100)
-                },
+                // 'transactionTotal': {
+                //     'currencyCode': objValues.currency,
+                //     'amount': parseInt(objValues.total_amount * 100)
+                // },
 
                 'currency': objValues.currency,
                 'poNumber': objValues.order_number,
@@ -216,24 +216,23 @@
                 },
                 'product': {
                     'referenceId': objValues.refId,
- //                   'purchasePrice': objValues.purchase_price * 100,
+                    'purchasePrice': objValues.purchase_price * 100,
 
-                    'purchasePrice': {
-                        'currencyCode': objValues.currency,
-                        'amount': parseInt(objValues.purchase_price * 100),
-                    }
+                    // 'purchasePrice': {
+                    //     'currencyCode': objValues.currency,
+                    //     'amount': parseInt(objValues.purchase_price * 100),
+                    // }
                     
                     // 'serialNumber' : objValues.serial_number
                 },
                 'plan': {
- //                    'purchasePrice':  objValues.plan_price * 100,
+                    'planId': objValues.extend_plan_id,
+                    'purchasePrice':  objValues.plan_price * 100,
 
-                    'purchasePrice': {
-                        'currencyCode': objValues.currency,
-                        'amount': parseInt(objValues.plan_price * 100),
-                    },
-
-                    'planId': objValues.extend_plan_id
+                    // 'purchasePrice': {
+                    //     'currencyCode': objValues.currency,
+                    //     'amount': parseInt(objValues.plan_price * 100),
+                    // },
                 }
             };
             return objJSON;

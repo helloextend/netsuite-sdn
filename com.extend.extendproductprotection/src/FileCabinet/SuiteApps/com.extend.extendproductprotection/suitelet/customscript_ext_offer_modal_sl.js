@@ -13,7 +13,7 @@
  *@NScriptType Suitelet
  *@NModuleScope Public
  */
-define([
+ define([
     'N/ui/serverWidget',
     'N/runtime',
     'N/http',
@@ -62,6 +62,7 @@ define([
                 objExtendItem.stItemId = objRequest.parameters.custpage_item_select;
                 objExtendItem.stItemName = objRequest.parameters.custpage_item_name.trim();
                 objExtendItem.stItemQty = objRequest.parameters.custpage_item_qty;
+                objExtendItem.stRefId = objRequest.parameters.custpage_item_ref_id;
                 objExtendItem.stPlanId = '';
                 objExtendItem.stPrice = 0;
                 objExtendItem.stDescription = '';
@@ -336,22 +337,13 @@ define([
                     try {
                         var objResponse = api.getPlansByItem(stItemRefId);
                         log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
+
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
-
                             log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
 
-                            var objPlans = objResponseBody.plans;
-                            log.debug('OFFER MODAL SUITELET: objPlans', objPlans);
-
-                            var arrPlans = objPlans.base;
+                            var arrPlans = objResponseBody.plans;
                             log.debug('OFFER MODAL SUITELET: arrPlans', arrPlans);
-
-                            if (arrPlans.length == 0) {
-                                var arrPlans = objPlans.adh;
-                            }
-
-                            log.debug('arrPlans', arrPlans);
 
                             //Populate Sublist Values
                             for (var i = 0; i < arrPlans.length; i++) {
