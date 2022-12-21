@@ -29,7 +29,7 @@ define([
             objExtendData = exports.getSalesOrderInfo(objSalesOrderRecord);
             log.audit('EXTEND UTIL _createExtendOrder: getSalesOrderInfo objExtendData', objExtendData);
             //build array of items
-            var objExtendItemData = exports.getSalesOrderItemInfo(objSalesOrderRecord);
+            var objExtendItemData = exports.getSalesOrderItemInfo(objSalesOrderRecord, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendItemData', objExtendItemData);
             //format items
             objExtendData.lineItems = exports.buildExtendItemJSON(objExtendItemData, objExtendConfig);
@@ -241,11 +241,14 @@ define([
         };
 
         /***********************************Support Functions********************************************/
-        exports.getFulfillmentData = function (objNewRecord) {
+        exports.getFulfillmentData = function (objNewRecord, objExtendConfig) {
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');
             var objExtendItemData = {};
 
             var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            //move extend item to config record instead of param
+//            var stExtendItemId = objExtendConfig.protection_plan_item;
+
             var stLineCount = objNewRecord.getLineCount({ sublistId: 'item' });
 
             for (var i = 0; i < stLineCount; i++) {
@@ -390,7 +393,7 @@ define([
             objExtendData.ship_country = objShipAddress.country;
             return objExtendData;
         };
-        exports.getSalesOrderItemInfo = function (objSalesOrderRecord) {
+        exports.getSalesOrderItemInfo = function (objSalesOrderRecord, objExtendConfig) {
             //////////////////////////SUPPORT FUNCTIONS///////////////////////////
             var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
 
@@ -399,15 +402,17 @@ define([
 
             var objExtendItemData = {};
 
-            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+                        //move extend item to config record instead of param
+                  //      var stExtendProductItemId = objExtendConfig.protection_plan_item;
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
-                if (stExtendItemId !== stItemId) {
+                if(!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)){
                     objExtendItemData[stUniqueKey] = {};
                 }
                 //Check if item is one of the configured extend items
-                if (stExtendItemId === stItemId) {
+                if (stExtendProductItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get value of leadtoken column on extend line
                     var stLeadToken =  objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: i });
@@ -420,7 +425,7 @@ define([
                         objExtendItemData[stUniqueKey].isLead = true;
                         // Start building the Extend Order Plan Info Object
                         objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
-                        objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
+                        //objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
                         objExtendItemData[stUniqueKey].extend_line = i;
                         objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
                         //set Extend Line Item Transaction ID on Extend Line
@@ -437,6 +442,9 @@ define([
                                 log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stRelatedItem + ' | ' + stExtendItemRefId);
 
                                 stUniqueKey = j;
+                                if(!objExtendItemData[stUniqueKey]){
+                                    objExtendItemData[stUniqueKey] = {};
+                                }
                                 // Start building the Extend Order Plan Info Object
                                 objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
                                 objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
@@ -504,7 +512,7 @@ define([
             return lineItems;
         };
         // Build the Extend API JSON for order creation
-        exports.buildExtendOrderJSON = function (objValues, config) {
+        exports.buildExtendOrderJSON = function (objValues, objExtendConfig) {
             log.debug('EXTEND UTIL _buildExtendOrderJSON:', '**ENTER**');
 
             // Date is a string and we need to format for extend
@@ -512,8 +520,8 @@ define([
 
             //If Demo use demo email for contracts
             //            var config = EXTEND_CONFIG.getConfig();
-            if (config.email) {
-                objValues.email = config.email;
+            if (objExtendConfig.email) {
+                objValues.email = objExtendConfig.email;
             }
 
             var objJSON = {
@@ -540,7 +548,7 @@ define([
 
                     }
                 },
-                'storeId': config.storeId,
+                'storeId': objExtendConfig.storeId,
                 'lineItems': objValues.lineItems,
                 'total': parseInt(objValues.total_amount * 100),
                 'transactionId': objValues.id,
@@ -584,9 +592,9 @@ define([
             return objAddress;
         };
         //get Item's reference ID 
-        exports.getItemRefId = function (stItemId, config) {
+        exports.getItemRefId = function (stItemId, objExtendConfig) {
             //          var config = EXTEND_CONFIG.getConfig();
-            var refIdValue = config.refId;
+            var refIdValue = objExtendConfig.refId;
             var stItemRefId = stItemId;
             if (refIdValue) {
                 // Lookup to item to see if it is eligible for warranty offers
