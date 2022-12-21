@@ -18,34 +18,52 @@
          */
         //create extend contracts
         exports.createExtendContracts = function (objExtendData, objSalesOrderRecord) {
-            log.debug('EXTEND UTIL _createExtendContracts:', '**ENTER**');
-            log.debug('EXTEND UTIL _createExtendContracts: SO ID', objSalesOrderRecord.id);
+            log.audit('EXTEND UTIL _createExtendContracts', '**ENTER**');
+            log.debug('EXTEND UTIL _createExtendContracts', 'SO ID: '+ objSalesOrderRecord.id);
 
             for (key in objExtendData) {
 
                 var objExtendContractRequestJSON = {};
-                var stQuantity = objExtendData[key].quantity;
-                log.debug('EXTEND UTIL _createExtendContracts: Quantity of Line', stQuantity);
                 var arrContractIds = [];
+                
+                var stStoreFilter = objExtendData[key].department;
+                log.debug("EXTEND UTIL _createExtendContracts", "stStoreFilter: "+ stStoreFilter);
+    
+                //get store config related to SO to be used with buildExtendContractJSON and createWarrantyContract
+                var objConfig = EXTEND_CONFIG.getConfig(stStoreFilter);
+                log.debug("EXTEND UTIL _createExtendContracts", 'objConfig - '+ JSON.stringify(objConfig));
+    
+                if(this.objectIsEmpty(objConfig)){
+                    log.audit("EXTEND UTIL _createExtendContracts", "No Config; Continuing to next transaction." )
+                }
+
+                var stQuantity = objExtendData[key].quantity;
+                log.debug('EXTEND UTIL _createExtendContracts', 'Quantity of Line: '+ stQuantity);
+
                 var stExtendContractQty = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_qty', line: objExtendData[key].line });
-                var stExtendContractId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: objExtendData[key].line });;
+                var stExtendContractId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: objExtendData[key].line });
 
                 if (stExtendContractId) {
                     arrContractIds = JSON.parse(stExtendContractId);
                 }
+
                 // Create contract call for quantity fulfilled on the Extend item 
                 for (var i = 0; i < stQuantity; i++) {
-                    objExtendContractRequestJSON = exports.buildExtendContractJSON(objExtendData[key]);
-                    log.debug('EXTEND UTIL _createExtendContracts: objExtendContractRequestJSON', objExtendContractRequestJSON);
-
-                    var objExtendResponse = EXTEND_API.createWarrantyContract(objExtendContractRequestJSON);
-                    log.debug('EXTEND UTIL _createExtendContracts: Extend Response Object: ' + i, objExtendResponse);
-                    if (objExtendResponse.code === 201) {
+                    //maybe get and pass config here and pass into buiul and create?????
+                    
+                    objExtendContractRequestJSON = this.buildExtendContractJSON(objExtendData[key], objConfig);
+                    log.debug('EXTEND UTIL _createExtendContracts','objExtendContractRequestJSON: '+ JSON.stringify(objExtendContractRequestJSON));
+                    
+                    var objExtendResponse = EXTEND_API.createWarrantyContract(objExtendContractRequestJSON, objConfig);
+                    log.debug('EXTEND UTIL _createExtendContracts', 'index: objExtendResponse - '+ i + ': ' +JSON.stringify(objExtendResponse));
+                    
+                    if (!this.objectIsEmpty(objExtendResponse) && objExtendResponse.code === 201) {
                         var objExtendResponseBody = JSON.parse(objExtendResponse.body);
                         arrContractIds.push(objExtendResponseBody.id);
                         stExtendContractQty++;
                     } else {
-                        log.error('EXTEND UTIL _createExtendContracts', objExtendResponse);
+                        log.error('EXTEND UTIL _createExtendContracts', 'objExtendResponse - ' + objExtendResponse);
+                        
                         objSalesOrderRecord.setValue({ fieldId: 'custbody_ext_process_error', value: true });
                         // create user note attached to record                 
                         var objNoteRecord = record.create({
@@ -57,8 +75,9 @@
                         var stNoteId = objNoteRecord.save();
                     }
                 }
-                log.debug('EXTEND UTIL _createExtendContracts: arrContractIds', arrContractIds);
-                log.debug('EXTEND UTIL _createExtendContracts: new stExtendContractQty', stExtendContractQty);
+
+                log.debug('EXTEND UTIL _createExtendContracts', 'arrContractIds - ' + arrContractIds);
+                log.debug('EXTEND UTIL _createExtendContracts', 'new stExtendContractQty - ' + stExtendContractQty);
 
                 // If Extend contract is created, populate the appropriate custom column field for contracts
                 // on the Sales Order line
@@ -71,19 +90,22 @@
 
         //get Sales Order Info required for contract create
         exports.getSalesOrderInfo = function (objExtendData, objSalesOrderRecord) {
-            log.debug('EXTEND UTIL _getSalesOrderInfo:', '**ENTER**');
+            log.audit('EXTEND UTIL _getSalesOrderInfo', '**ENTER**');
 
             for (stKey in objExtendData) {
-                log.debug('EXTEND UTIL _getSalesOrderInfo: Key', stKey);
-                log.debug('EXTEND UTIL _getSalesOrderInfo: ExtendData Object', objExtendData);
+                log.debug('EXTEND UTIL _getSalesOrderInfo','Key - '+ stKey);
+                log.debug('EXTEND UTIL _getSalesOrderInfo','objExtendData - '+ JSON.stringify(objExtendData));
+
                 var objCustomerInfo = exports.getCustomerInfo(objSalesOrderRecord.getValue({ fieldId: 'entity' }));
+                log.debug('EXTEND UTIL _getSalesOrderInfo','objCustomerInfo - '+ JSON.stringify(objCustomerInfo))
+                
                 //Build SO Info Object
                 objExtendData[stKey].id = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
                 objExtendData[stKey].tran_date = exports.getepochDate();
                 objExtendData[stKey].currency = 'USD';
                 objExtendData[stKey].order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
                 objExtendData[stKey].total_amount = objSalesOrderRecord.getValue({ fieldId: 'total' });
-                objExtendData[stKey].name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
+                objExtendData[stKey].name = objCustomerInfo.name; //objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
                 objExtendData[stKey].email = objCustomerInfo.email;
                 objExtendData[stKey].phone = objCustomerInfo.phone;
                 objExtendData[stKey].bill_address1 = objCustomerInfo.bill_address1;
@@ -98,9 +120,11 @@
                 objExtendData[stKey].ship_state = objCustomerInfo.ship_state;
                 objExtendData[stKey].ship_zip = objCustomerInfo.ship_zip;
                 objExtendData[stKey].ship_country = objCustomerInfo.ship_country;
+                objExtendData[stKey].department = objSalesOrderRecord.getValue({ fieldId: 'department' });
             }
             return objExtendData;
         };
+        
         exports.getItemRefId = function(stItemId){
             var refIdValue = EXTEND_CONFIG.getConfig().refId;
             var stItemRefId = stItemId;
@@ -135,6 +159,7 @@
                 id: stCustomerId
             });
             var objCustomerInfo = {
+                "name": objCustomerRecord.getValue({ fieldId: 'firstname' }) +" "+ objCustomerRecord.getValue({ fieldId: 'lastname' }),
                 "email": objCustomerRecord.getValue({ fieldId: 'email' }),
                 "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
                 "bill_address1": objCustomerRecord.getValue({ fieldId: 'billaddr1' }),
@@ -168,19 +193,21 @@
         };
 
         // Build the Extend API JSON for contract creation
-        exports.buildExtendContractJSON = function (objValues) {
-            log.debug('EXTEND UTIL _buildExtendContractJSON:', '**ENTER**');
+        exports.buildExtendContractJSON = function (objValues, config) {
+            log.audit('EXTEND UTIL _buildExtendContractJSON', '**ENTER**');
 
             // Date is a string and we need to format for extend
             const stTranDate = new Date(objValues.tran_date);
 
             //get product refId
             objValues.refId = exports.getItemRefId(objValues.itemId);
+            
             //If Demo use demo email for contracts
-            log.debug('demo email', EXTEND_CONFIG.getConfig());
-            if(EXTEND_CONFIG.getConfig().email){
-                objValues.email = EXTEND_CONFIG.getConfig().email;
+            if(config && config.email){
+                log.debug('EXTEND UTIL _buildExtendContractJSON', 'demo email - '+config.email);
+                objValues.email = config.email;
             }
+
             var objJSON = {
                 'transactionId': objValues.id,
                 'transactionDate': objValues.tran_date,

@@ -69,7 +69,7 @@
       <allpartners>F</allpartners>
       <allroles>T</allroles>
       <audslctrole></audslctrole>
-      <custscript_ext_environment></custscript_ext_environment>
+      <custscript_ext_environment>[scriptid=customlist_ext_environment.val_60113_t2522354_779]</custscript_ext_environment>
       <custscript_ext_protection_plan></custscript_ext_protection_plan>
       <eventtype></eventtype>
       <isdeployed>T</isdeployed>

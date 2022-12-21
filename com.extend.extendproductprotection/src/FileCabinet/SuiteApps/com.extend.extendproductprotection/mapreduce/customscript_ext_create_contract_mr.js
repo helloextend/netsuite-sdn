@@ -39,7 +39,7 @@
         }
         exports.map = function (context) {
             try {
-                log.debug('map', '** START **');
+                log.audit('map', '** START **');
                 var contextValues = JSON.parse(context.value);
                 var stFulfillmentId = contextValues.id;
                 var stSalesOrderId = contextValues.values.createdfrom.value;
@@ -76,7 +76,7 @@
         }
         exports.reduce = function (context) {
             try {
-                log.debug('reduce', '** START **');
+                log.audit('reduce', '** START **');
 
                 var stSalesOrderId = context.key;
                 log.audit('reduce', 'stSalesOrderId: ' + stSalesOrderId);
@@ -88,25 +88,27 @@
                 });
 
                 var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
-
-                log.debug('reduce: Line Count', stLineCount);
+                log.debug('reduce',' Line Count - '+ stLineCount);
 
                 if (stLineCount > 0) {
-                    log.debug('reduce: Get Extend Data', '**START**');
                     var objExtendData = _getExtendData(stLineCount, objSalesOrderRecord);
-                    log.audit('reduce: Line Data to Extend Object', objExtendData);
 
-                    if (!EXTEND_UTIL.objectIsEmpty(objExtendData)) {
-                        log.audit('reduce: Item object not empty: PASS', EXTEND_UTIL.objectIsEmpty(objExtendData));
+                    if (!EXTEND_UTIL.objectIsEmpty(objExtendData)) {          
+                        log.debug('reduce','objExtendData - '+ JSON.stringify(objExtendData));
+              
                         // Get Extend Details from Sales Order
-                        objExtendData = EXTEND_UTIL.getSalesOrderInfo(objExtendData, objSalesOrderRecord);
-                        log.audit('reduce: SO Data to Extend Object', objExtendData);
-                        EXTEND_UTIL.createExtendContracts(objExtendData, objSalesOrderRecord);
+                        var objSalesData = EXTEND_UTIL.getSalesOrderInfo(objExtendData, objSalesOrderRecord);
+                        log.debug('reduce','SO Data from Extend Object - '+ JSON.stringify(objSalesData));
+                        
+                        EXTEND_UTIL.createExtendContracts(objSalesData, objSalesOrderRecord);
+                    }else{
+                        log.audit('reduce', 'empty objExtendData for '+stSalesOrderId+' - ' + EXTEND_UTIL.objectIsEmpty(objExtendData));
                     }
                 }
 
             } catch (e) {
                 log.error('reduce', 'key: ' + context.key + ' error: ' + e);
+
                 record.submitFields({
                     type: record.Type.SALES_ORDER,
                     id: stSalesOrderId,
@@ -151,7 +153,7 @@
         //////////////////////////SUPPORT FUNCTIONS///////////////////////////
 
         function _getExtendData(stLineCount, objNewRecord) {
-            log.debug('_getExtendData: Get Extend Data', '**ENTER**');
+            log.debug('reduce _getExtendData', '**ENTER**');
             var objExtendItemData = {};
 
             var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
@@ -159,22 +161,35 @@
                 var stItemId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 //Check if item is one of the configured extend items
                 if (stExtendItemId === stItemId) {
-                    log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
+                    log.debug('reduce _getExtendData', 'Item Found | stItemId - '+stItemId + ' on line ' + i);
+
                     //get qty of contracts created & compare to extend item qty
-                    var stContractQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_qty', line: i });
+                    var stContractQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_qty', line: i }) || 0;
                     var stExtendItemQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                    log.debug('reduce _getExtendData', 'Item Found | stContractQty - '+ stContractQty);
+                    log.debug('reduce _getExtendData', 'Item Found | stExtendItemQty - '+ stExtendItemQty);
 
                     if (stContractQty < stExtendItemQty) {
 
                         //get related item from extend line
                         var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
+                        log.debug('reduce _getExtendData', 'Extend Assoc Item | stExtendItemRefId - '+ stExtendItemRefId);
+
                         //check for new fulfillments
                         for (var j = 0; j < stLineCount; j++) {
-                            var stRelatedItem = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
-                            if (stRelatedItem === stExtendItemRefId) {
+                            log.debug('reduce _getExtendData', 'Loop index | j - '+ j);
+
+                            var stRelatedItem = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_sptx_extend_parent_id', line: j });
+                            log.debug('reduce _getExtendData', 'SO Line Item | stRelatedItem - '+ stRelatedItem);
+
+                            if (stRelatedItem == stExtendItemRefId) {
+                                log.debug('reduce _getExtendData', 'stRelatedItem === stExtendItemRefId - Line: ' + j + ': '+stRelatedItem+ '===' +stExtendItemRefId);
 
                                 var stRelatedItemQtyFulfilled = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: j });
+                                log.debug('reduce _getExtendData','stRelatedItem === stExtendItemRefId - stRelatedItemQtyFulfilled -'+ stRelatedItemQtyFulfilled);
+
                                 if (stRelatedItemQtyFulfilled <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
+                                    log.debug('reduce _getExtendData', 'stRelatedItemQtyFulfilled <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty ');
 
                                     var stUniqueKey = i;
                                     // Start building the Extend Order Info Object
@@ -195,7 +210,7 @@
                 }
             }
 
-            log.debug('_getExtendData: return objExtendItemData', objExtendItemData);
+            log.debug('reduce _getExtendData','objExtendItemData - '+ JSON.stringify(objExtendItemData));
 
             return objExtendItemData
         };

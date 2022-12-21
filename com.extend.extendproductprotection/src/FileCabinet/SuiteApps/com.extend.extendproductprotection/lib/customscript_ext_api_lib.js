@@ -5,11 +5,13 @@
  */
  define([
   'N/https',
-  '../lib/customscript_ext_config_lib'
+  '../lib/customscript_ext_config_lib',
+  '../lib/customscript_ext_util.js'
+
 ],
 
   //todo add additional extend API calls
-  function (https, extendConfig) {
+  function (https, EXTEND_CONFIG, EXTEND_UTIL) {
 
     var exports = {};
 
@@ -20,7 +22,7 @@
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products/post
      */
     exports.createProduct = function (arrProducts, bIsBatch, bIsUpsert) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/products?upsert=' + bIsUpsert + '?batch=' + bIsBatch,
@@ -46,7 +48,7 @@
      */
     exports.updateProduct = function (objProductDetails, stItemId) {
       // log.debug('Extend Product Details', objProductDetails);
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.put({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -71,7 +73,7 @@
      * API Documentation: https://developers.helloextend.com/2020-08-01#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/get
      */
     exports.getProduct = function (stItemId) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -94,7 +96,7 @@
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/delete
      */
     exports.deleteProduct = function (stItemId) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -119,7 +121,7 @@
      * API Documentation: https://developers.extend.com/default#operation/getOffer
      */
     exports.getPlansByItem = function (stItemId) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig('22'); //hardcoded value of Spotix Dept. Can be updated to be dynamic in the future
       try {
         var response = https.get({
           url: config.domain + '/offers?storeId=' + config.storeId + '&productId=' + stItemId,
@@ -143,9 +145,17 @@
      * CREATE CONTRACT
      * API Documentation: https://developers.extend.com/default#operation/createContracts
      */
-    exports.createWarrantyContract = function (objContractDetails) {
-      var config = extendConfig.getConfig();
+    exports.createWarrantyContract = function (objContractDetails, config) {
+      // log.debug("createWarrantyContract", 'stStoreFilter - '+stStoreFilter)
 
+      // var config = EXTEND_CONFIG.getConfig(stStoreFilter);
+      // log.debug("createWarrantyContract", JSON.stringify(config))
+
+      //exit function if no config
+      if(EXTEND_UTIL.objectIsEmpty(config)){
+        log.error("createWarrantyContract", "Exiting createWarrantyContract; no config.")
+        return "Store not configured for this transaction.";
+      }
 
       try {
         var response = https.post({
@@ -162,8 +172,8 @@
           return response;
         }
       } catch (e) {
-        log.debug('Error Calling API', JSON.stringify(e.message));
-        return;
+        log.error('Error Calling API', JSON.stringify(e.message));
+        return false;
       }
     };
     /**
@@ -171,7 +181,7 @@
  * API Documentation: https://developers.helloextend.com/2020-08-01#operation/updateContracts
  */
     exports.updateWarrantyContract = function (objContractDetails, stContractId) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.put({
           url: config.domain + '/contracts/' + stContractId,
@@ -197,7 +207,7 @@
      * API Documentation: https://developers.extend.com/default#operation/refundContract
      */
     exports.cancelWarrantyContract = function (stContractId, bIsCommit) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/contracts/' + stContractId + '/refund?commit=' + bIsCommit,
@@ -221,7 +231,7 @@
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1stores~1{storeId}~1leads/post
      */
     exports.createLead = function (objLeadDetails) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/leads',
@@ -246,7 +256,7 @@
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1leads~1{leadToken}~1offers/get
      */
     exports.getLeadOffers = function (objLeadDetails) {
-      var config = extendConfig.getConfig();
+      var config = EXTEND_CONFIG.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/leads/' + config.storeId + '/offers',

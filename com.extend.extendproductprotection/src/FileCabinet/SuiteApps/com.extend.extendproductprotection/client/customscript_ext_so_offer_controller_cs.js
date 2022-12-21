@@ -46,8 +46,16 @@ define([
 
             log.debug('Handling Input', context);
             log.debug('Sublist', context.currentRecord.getSublist({ sublistId: context.sublistId }));
-            log.debug('config', EXTEND_CONFIG.getConfig());
-            var refIdValue = EXTEND_CONFIG.getConfig().refId;
+            
+            var objConfig = EXTEND_CONFIG.getConfig();
+            log.debug('_handleItemInput: config', objConfig);
+
+            if(EXTEND_UTIL.objectIsEmpty(objConfig)){
+                log.error("_handleItemInput", "EXITING: objConfig is empty");
+                return false;
+            }
+
+            var refIdValue = objConfig.refId;
 
             var objCurrentRecord = context.currentRecord;
 
@@ -115,9 +123,19 @@ define([
             var linecount = objCurrentRecord.getLineCount({
                 sublistId: stSublistId
             });
-            log.debug('linecount', linecount);
-            log.debug('config', EXTEND_CONFIG.getConfig());
-            var refIdValue = EXTEND_CONFIG.getConfig().refId;
+            log.debug('openSuitelet: linecount', linecount);
+
+            var objConfig = EXTEND_CONFIG.getConfig();
+            log.debug('openSuitelet: config', objConfig);
+
+            if(EXTEND_UTIL.objectIsEmpty(objConfig)){
+                log.error("openSuitelet", "EXITING: objConfig is empty");
+                return false;
+            }
+
+            var refIdValue = objConfig.refId;
+            log.debug('refIdValue', refIdValue);
+
             //get extend item
             var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
 
@@ -160,7 +178,8 @@ define([
                 objItem.qty = intQty;
                 objItem.line = i;
                 objItem.refId = stItemRefId;
-                //log.debug('objItem', objItem);
+                log.debug('objItem', objItem);
+                
                 //push to array
                 if (stExtendItem != stItemId) {
                     arrItemList.push(objItem);
@@ -186,7 +205,7 @@ define([
                 }
             });
             //Call the pop up suitelet
-            window.open(slUrl, '_blank', 'screenX=300,screenY=300,width=900,height=500,titlebar=0,status=no,menubar=no,resizable=0,scrollbars=0');
+            window.open(slUrl, '_blank', 'screenX=300,screenY=300,width=1000,height=800,titlebar=0,status=no,menubar=no,resizable=0,scrollbars=0');
 
         }
         return exports;

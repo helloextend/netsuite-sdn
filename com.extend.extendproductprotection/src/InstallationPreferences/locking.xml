@@ -4,8 +4,8 @@
 <!-- For more information, see https://system.netsuite.com/app/help/helpcenter.nl?fid=section_1543865613.html -->
 
 <preference type="LOCKING" defaultAction="UNLOCK">
-    <!-- <apply action="LOCK"> -->
-        <!-- <object>custcontenttype_myobject</object> -->
-        <!-- <path>~/FileCabinet/SuiteApps/xxx.xxx.xxx/MyScript.js</path> -->
-    <!-- </apply> -->
+    <!-- <apply action="UNLOCK"> -->
+        <!-- <object>custcontenttype_myobject</object>  -->
+        <!-- <path appliesTo="FILES_AND_FOLDERS" includeRoot="F">~/FileCabinet/SuiteApps/com.extend.extendproductprotection/*</path> -->
+   <!-- </apply>  -->
 </preference>

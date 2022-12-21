@@ -24,6 +24,8 @@
       <feature required="false">WORKORDERS</feature>
       <feature required="false">RECEIVABLES</feature>
       <feature required="false">PAYABLES</feature>
+      <feature required="true">DEPARTMENTS</feature>
+      <feature required="false">CUSTOMSEGMENTS</feature>
     </features>
   </dependencies>
 </manifest>
