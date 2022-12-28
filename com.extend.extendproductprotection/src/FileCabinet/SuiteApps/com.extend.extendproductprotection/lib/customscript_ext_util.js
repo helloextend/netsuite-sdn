@@ -273,7 +273,7 @@ define([
                             if (stRelatedItem === stExtendItemRefId) {
 
                                 var stRelatedItemQtyFulfilled = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: j });
-                                if (stRelatedItemQtyFulfilled <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
+                                if (stContractQty <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
 
                                     var stUniqueKey = i;
                                     // Start building the Extend Order Info Object
