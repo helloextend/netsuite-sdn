@@ -3,7 +3,7 @@
  *@description: Structures the various JSON request bodies to the Extend API
  * @NApiVersion 2.x
  */
-define([
+ define([
     'N/runtime',
     'N/search',
     'N/record',
@@ -247,7 +247,7 @@ define([
 
             var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
             //move extend item to config record instead of param
-//            var stExtendItemId = objExtendConfig.protection_plan_item;
+            //            var stExtendItemId = objExtendConfig.protection_plan_item;
 
             var stLineCount = objNewRecord.getLineCount({ sublistId: 'item' });
 
@@ -273,7 +273,7 @@ define([
                             if (stRelatedItem === stExtendItemRefId) {
 
                                 var stRelatedItemQtyFulfilled = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: j });
-                                if (stRelatedItemQtyFulfilled <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
+                                if (stContractQty <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
 
                                     var stUniqueKey = i;
                                     // Start building the Extend Order Info Object
@@ -396,26 +396,34 @@ define([
         exports.getSalesOrderItemInfo = function (objSalesOrderRecord, objExtendConfig) {
             //////////////////////////SUPPORT FUNCTIONS///////////////////////////
             var stLineCount = objSalesOrderRecord.getLineCount({ sublistId: 'item' });
-
-            log.debug('EXTEND UTIL _createExtendOrder: Line Count', stLineCount);
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');
 
             var objExtendItemData = {};
 
             var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
-                        //move extend item to config record instead of param
-                  //      var stExtendProductItemId = objExtendConfig.protection_plan_item;
+            //move extend item to config record instead of param
+              //    var stExtendProductItemId = objExtendConfig.product_plan_item;
+                  var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
-                if(!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)){
+                if (!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)) {
                     objExtendItemData[stUniqueKey] = {};
                 }
                 //Check if item is one of the configured extend items
+                if (stExtendShippingItemId === stItemId) {
+                    //if line is shipping proection
+                    objExtendItemData[stUniqueKey] = {};
+                    objExtendItemData[stUniqueKey].isShipping = true;
+                    // Start building the Extend Order Plan Info Object
+                    objExtendItemData[stUniqueKey].quoteId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_quote_id', line: i });
+                    //set Extend Line Item Transaction ID on Extend Line
+                    objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
+                }
                 if (stExtendProductItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get value of leadtoken column on extend line
-                    var stLeadToken =  objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: i });
+                    var stLeadToken = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: i });
                     log.debug('_getExtendData: stLeadToken', stLeadToken + '|' + typeof stLeadToken);
 
                     //if extend line has lead token mark isLead = T
@@ -423,13 +431,14 @@ define([
                         log.debug('_getExtendData: stLeadToken ', stLeadToken);
                         objExtendItemData[stUniqueKey] = {};
                         objExtendItemData[stUniqueKey].isLead = true;
+                        objExtendItemData[stUniqueKey].leadToken = stLeadToken;
+                        objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                         // Start building the Extend Order Plan Info Object
                         objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
-                        //objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
-                        objExtendItemData[stUniqueKey].extend_line = i;
+                        objExtendItemData[stUniqueKey].extend_line = ""+i;
                         objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
                         //set Extend Line Item Transaction ID on Extend Line
-                        objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;                       
+                        objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
                     }
                     //
                     else {
@@ -442,13 +451,13 @@ define([
                                 log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stRelatedItem + ' | ' + stExtendItemRefId);
 
                                 stUniqueKey = j;
-                                if(!objExtendItemData[stUniqueKey]){
+                                if (!objExtendItemData[stUniqueKey]) {
                                     objExtendItemData[stUniqueKey] = {};
                                 }
                                 // Start building the Extend Order Plan Info Object
                                 objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
                                 objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
-                                objExtendItemData[stUniqueKey].extend_line = i;
+                                objExtendItemData[stUniqueKey].extend_line = ""+i;
                                 objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
                                 //set Extend Line Item Transaction ID of related product on Extend Line
                                 objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
@@ -480,11 +489,30 @@ define([
             var lineItems = [];
             for (key in objValues) {
                 //if line is leadToken contract
-                if (objValues.isLead) {
-
-                } else {
+                if (objValues[key].isLead) {
+                    //objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
+                    var item = {
+                        'leadToken': objValues[key].leadToken,
+                        'quantity': objValues[key].quantity,
+                        'lineItemTransactionId': objValues[key].lineItemID
+                    }
+                    if (objValues[key].extend_plan_id && objValues[key].plan_price) {
+                        item.plan = {
+                            'id': objValues[key].extend_plan_id.toString(),
+                            'purchasePrice': objValues[key].plan_price
+                        }
+                    }
+                } else if (objValues.isShipping) {
+                    var item = {
+                        "quoteId": objValues[key].quoteId,
+                        "shipmentInfo": []
+                    }
+                }
+                else {
                     //get product refId
-                    objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
+                                                log.debug('_buildExtendItemJSON: objValues', objValues);
+
+                    objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
                         'product': {
                             'id': objValues.refId,
