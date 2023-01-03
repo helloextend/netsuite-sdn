@@ -3,7 +3,7 @@
  *@description: Structures the various JSON request bodies to the Extend API
  * @NApiVersion 2.x
  */
-define([
+ define([
     'N/runtime',
     'N/search',
     'N/record',
@@ -400,9 +400,9 @@ define([
 
             var objExtendItemData = {};
 
-           // var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
             //move extend item to config record instead of param
-                  var stExtendProductItemId = objExtendConfig.product_plan_item;
+              //    var stExtendProductItemId = objExtendConfig.product_plan_item;
                   var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
@@ -489,8 +489,8 @@ define([
             var lineItems = [];
             for (key in objValues) {
                 //if line is leadToken contract
-                if (objValues.isLead) {
-                    objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
+                if (objValues[key].isLead) {
+                    //objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
                         'leadToken': objValues[key].leadToken,
                         'quantity': objValues[key].quantity,
@@ -502,7 +502,7 @@ define([
                             'purchasePrice': objValues[key].plan_price
                         }
                     }
-                } if (objValues.isShipping) {
+                } else if (objValues.isShipping) {
                     var item = {
                         "quoteId": objValues[key].quoteId,
                         "shipmentInfo": []
@@ -510,7 +510,9 @@ define([
                 }
                 else {
                     //get product refId
-                    objValues.refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
+                                                log.debug('_buildExtendItemJSON: objValues', objValues);
+
+                    objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
                         'product': {
                             'id': objValues.refId,
