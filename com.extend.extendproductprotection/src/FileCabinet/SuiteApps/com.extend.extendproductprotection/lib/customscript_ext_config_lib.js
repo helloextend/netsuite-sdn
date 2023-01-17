@@ -12,7 +12,7 @@ define([
             SANDBOX: 1,
             PRODUCTION: 2
         }
-        exports.getConfig = function () {
+        exports.getConfig = function (stExtendConfigRecId) {
             //Get storeId & APIkey from config custom record
 
             var STORE_ID;
@@ -26,7 +26,7 @@ define([
             var DOMAIN = 'https://api-demo.helloextend.com';
 
 
-            var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
+            //var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
             log.debug('_getConfig: stExtendConfigRecId ', stExtendConfigRecId);
 
             var arrFilters = ["internalId", "is", stExtendConfigRecId];

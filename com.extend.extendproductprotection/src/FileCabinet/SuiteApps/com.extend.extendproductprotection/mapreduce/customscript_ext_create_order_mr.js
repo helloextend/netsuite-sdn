@@ -51,7 +51,8 @@ define([
                     id: stSalesOrderId
                 });
                 // Get Extend Details from Sales Order
-                var objExtendConfig = EXTEND_CONFIG.getConfig();
+                var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config');
+                var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
                 objExtendData = EXTEND_UTIL.createExtendOrder(objSalesOrderRecord, objExtendConfig);
 
             } catch (e) {

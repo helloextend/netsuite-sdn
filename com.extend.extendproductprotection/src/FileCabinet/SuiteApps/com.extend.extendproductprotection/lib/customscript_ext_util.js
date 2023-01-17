@@ -510,7 +510,7 @@
                 }
                 else {
                     //get product refId
-                                                log.debug('_buildExtendItemJSON: objValues', objValues);
+                    log.debug('_buildExtendItemJSON: objValues', objValues);
 
                     objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
