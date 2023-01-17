@@ -3,7 +3,7 @@
  * Houses calls to Extend API
  * @NApiVersion 2.1
  */
- define([
+define([
   'N/https',
   '../lib/customscript_ext_config_lib'
 ],
@@ -20,7 +20,6 @@
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products/post
      */
     exports.createProduct = function (arrProducts, bIsBatch, bIsUpsert, config) {
-     // var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/products?upsert=' + bIsUpsert + '?batch=' + bIsBatch,
@@ -45,7 +44,6 @@
      */
     exports.updateProduct = function (objProductDetails, stItemId, config) {
       // log.debug('Extend Product Details', objProductDetails);
-     // var config = extendConfig.getConfig();
       try {
         var response = https.put({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -69,7 +67,6 @@
      * API Documentation: https://developers.helloextend.com/2020-08-01#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/get
      */
     exports.getProduct = function (stItemId, config) {
-      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -92,7 +89,6 @@
      * API Documentation: https://developers.extend.com/default#tag/Products/paths/~1stores~1{storeId}~1products~1{productId}/delete
      */
     exports.deleteProduct = function (stItemId, config) {
-      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/stores/' + config.storeId + '/products/' + stItemId,
@@ -117,7 +113,6 @@
      * API Documentation: https://developers.extend.com/default#operation/getOffer
      */
     exports.getOffers= function (stItemId, config) {
-     // var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/offers?storeId=' + config.storeId + '&productId=' + stItemId,
@@ -142,7 +137,6 @@
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1stores~1{storeId}~1leads/post
      */
     exports.createLead = function (objLeadDetails, config) {
-     // var config = extendConfig.getConfig();
       try {
         var response = https.post({
           url: config.domain + '/stores/' + config.storeId + '/leads',
@@ -166,7 +160,6 @@
      * API Documentation:  https://developers.helloextend.com/2020-08-01#tag/Leads/paths/~1leads~1{leadToken}~1offers/get
      */
     exports.getLeadOffers = function (objLeadDetails, config) {
-      //var config = extendConfig.getConfig();
       try {
         var response = https.get({
           url: config.domain + '/leads/' + config.storeId + '/offers',
@@ -192,8 +185,6 @@
      * API Documentation: https://docs.extend.com/reference/orderscreate
      */
      exports.createOrder = function (objOrderDetails, config) {
-     // var config = extendConfig.getConfig();
-
       try {
         var response = https.post({
           url: config.domain + '/orders',
@@ -218,7 +209,6 @@
  * API Documentation: https://docs.extend.com/reference/lineitemsfulfill
  */
     exports.fulfillOrderLine = function (objOrderDetails, config) {
-     // var config = extendConfig.getConfig();
       try {
         var guid = exports.generateUUID();
         log.debug('guid', guid);
@@ -246,9 +236,7 @@
      * REFUND CONTRACT
      * API Documentation: https://docs.extend.com/reference/refundscreate
      */
-    exports.refundContract = function (objRefundDetails, config) {
-    //  var config = extendConfig.getConfig();
-      
+    exports.refundContract = function (objRefundDetails, config) {      
       log.debug('requestRefund', "objRefundDetails - "+JSON.stringify(objRefundDetails))
 
       try {
@@ -274,7 +262,6 @@
      * API Documentation: https://docs.extend.com/reference/refundsget
      */
          exports.getRefundQuote = function (objRefundDetails, config) {
-         // var config = extendConfig.getConfig();
           try {
             var response = https.get({
               url: config.domain + '/refunds',
@@ -298,7 +285,6 @@
      * API Documentation: https://docs.extend.com/reference/refundscreate
      */
  exports.requestRefund = function (objRefundDetails, config) {
- // var config = extendConfig.getConfig();
   try {
     var response = https.post({
       url: config.domain + '/refunds',

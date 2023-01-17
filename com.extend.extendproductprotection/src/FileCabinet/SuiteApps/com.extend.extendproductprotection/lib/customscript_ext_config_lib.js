@@ -2,7 +2,7 @@
  * keyconfig
  * @NApiVersion 2.1
  */
- define([
+define([
     'N/runtime',
     'N/search'
 ],

@@ -25,6 +25,8 @@
       <feature required="false">RECEIVABLES</feature>
       <feature required="false">PAYABLES</feature>
       <feature required="false">MATRIXITEMS</feature>
+      <feature required="false">CUSTOMSEGMENTS</feature>
+      <feature required="false">WEBSTORE</feature>
     </features>
   </dependencies>
 </manifest>

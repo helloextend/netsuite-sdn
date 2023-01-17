@@ -1,8 +1,6 @@
 <transactionbodycustomfield scriptid="custbody_ext_process_error">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
-  <bodyassemblybuild>F</bodyassemblybuild>
-  <bodybom>F</bodybom>
   <bodycustomerpayment>F</bodycustomerpayment>
   <bodydeposit>F</bodydeposit>
   <bodydepositapplication>F</bodydepositapplication>
@@ -21,6 +19,7 @@
   <bodyprintstatement>F</bodyprintstatement>
   <bodypurchase>F</bodypurchase>
   <bodysale>T</bodysale>
+  <bodystore>F</bodystore>
   <bodytransferorder>F</bodytransferorder>
   <bodyvendorpayment>F</bodyvendorpayment>
   <checkspelling>F</checkspelling>

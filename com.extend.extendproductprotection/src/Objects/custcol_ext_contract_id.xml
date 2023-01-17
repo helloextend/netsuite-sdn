@@ -1,7 +1,6 @@
-<transactioncolumncustomfield scriptid="custcol_ext_plan_id">
+<transactioncolumncustomfield scriptid="custcol_ext_contract_id">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
-  <colbuild>F</colbuild>
   <colexpense>F</colexpense>
   <colexpensereport>F</colexpensereport>
   <colgrouponinvoices>F</colgrouponinvoices>
@@ -22,7 +21,6 @@
   <colstore>F</colstore>
   <colstorehidden>F</colstorehidden>
   <colstorewithgroups>F</colstorewithgroups>
-  <coltime>F</coltime>
   <coltransferorder>F</coltransferorder>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
@@ -33,11 +31,11 @@
   <displaywidth></displaywidth>
   <dynamicdefault></dynamicdefault>
   <encryptatrest>F</encryptatrest>
-  <fieldtype>TEXT</fieldtype>
+  <fieldtype>TEXTAREA</fieldtype>
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Plan ID</label>
+  <label>Extend Contract ID</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

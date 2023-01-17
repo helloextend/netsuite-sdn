@@ -1,7 +1,7 @@
 <mapreducescript scriptid="customscript_ext_create_order_mr">
   <description></description>
   <isinactive>F</isinactive>
-  <name>Extend |  MR | Order Create</name>
+  <name>Extend | MR | Create Order</name>
   <notifyadmins>F</notifyadmins>
   <notifyemails></notifyemails>
   <notifyowner>T</notifyowner>
@@ -23,7 +23,7 @@
       <help></help>
       <isformula>F</isformula>
       <ismandatory>F</ismandatory>
-      <label>Extend Orders Search</label>
+      <label>Extend Order Search</label>
       <linktext></linktext>
       <maxlength></maxlength>
       <maxvalue></maxvalue>
@@ -44,15 +44,16 @@
       <loglevel>DEBUG</loglevel>
       <queueallstagesatonce>T</queueallstagesatonce>
       <runasrole>ADMINISTRATOR</runasrole>
-      <status>NOTSCHEDULED</status>
-      <title>Extend |  MR | Order Create</title>
+      <status>SCHEDULED</status>
+      <title>Extend | MR | Create Order</title>
       <yieldaftermins>60</yieldaftermins>
       <recurrence>
-        <single>
+        <daily>
+          <everyxdays>1</everyxdays>
           <repeat></repeat>
-          <startdate>2022-06-15</startdate>
-          <starttime>01:00:00Z</starttime>
-        </single>
+          <startdate>2023-01-05</startdate>
+          <starttime>05:00:00Z</starttime>
+        </daily>
       </recurrence>
     </scriptdeployment>
   </scriptdeployments>
