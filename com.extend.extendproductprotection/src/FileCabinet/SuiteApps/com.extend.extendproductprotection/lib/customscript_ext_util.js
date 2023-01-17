@@ -591,6 +591,35 @@
             }
             return objJSON;
         };
+        exports.buildExtendShipmentJSON = function(objValues){
+            var objJSON = {
+                'lineItemTransactionId': objValues.lineItemID,
+                'destination': {
+                    'address1': objValues.dest_address1,
+                    'address2': objValues.dest_address2,
+                    'city': objValues.dest_city,
+                    'postalCode': objValues.dest_zip,
+                    'countryCode': objValues.dest_country,
+                    'provinceCode': objValues.dest_state,
+                },
+                'productIds': [
+                    "{{productId}}"
+                ],
+                'shipmentDate': objValues.ship_date,
+                'shippingProvider': objValues.carrier,
+                'source': {
+                    'address1': objValues.source_address1,
+                    'address2': objValues.source_address2,
+                    'city': objValues.source_city,
+                    'postalCode': objValues.source_zip,
+                    'countryCode': objValues.source_country,
+                    'provinceCode': objValues.source_state,
+                },
+                'trackingId': objValues.tracking_number,
+                'trackingUrl': objValues.tracking_url
+            }
+            return objJSON;
+        };
         /***********************************Support Functions********************************************/
         //get Address Subrecord fields from transaction 
         exports.getAddress = function (objSalesOrderRecord, addressField) {

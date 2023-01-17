@@ -44,6 +44,9 @@ define([
                         search.createColumn({ name: "custrecord_ext_demo_email", label: "Email" }),
                         search.createColumn({ name: "custrecord_ext_store_id", label: "Store ID" }),
                         search.createColumn({ name: "custrecord_ext_ref_id", label: "Ref ID" }),
+                        search.createColumn({ name: "custrecord_ext_pp_item", label: "Product Protection Item" }),
+                        search.createColumn({ name: "custrecord_ext_sp_item", label: "Shipping Protection Item" }),
+                        search.createColumn({ name: "custrecord_ext_sp_enabled", label: "Shipping Enabled" })
 
                     ]
             });
@@ -70,8 +73,9 @@ define([
                 if (result.getValue({ name: 'custrecord_ext_api_version' })) {
                     API_VERSION = result.getValue({ name: 'custrecord_ext_api_version' });
                 }
-                PRODUCT_ITEM = result.getValue({ name: 'custrecord_ext_product_item' });
-                SHIPPING_ITEM = result.getValue({ name: 'custrecord_ext_shipping_item' });
+                PRODUCT_ITEM = result.getValue({ name: 'custrecord_ext_pp_item' });
+                SHIPPING_ITEM = result.getValue({ name: 'custrecord_ext_sp_item' });
+                SHIPPING_ENABLED = result.getValue({ name: 'custrecord_ext_sp_enabled' });
 
                 return true;
             });
@@ -85,7 +89,8 @@ define([
                 email: EMAIL, //IMPORTATN: SB and Testing environemnts requires manual assignment of a test email
                 refId: REF_ID,
                 product_plan_item: PRODUCT_ITEM,
-                shipping_plan_item: SHIPPING_ITEM
+                shipping_plan_item: SHIPPING_ITEM,
+                shipping_enabled: SHIPPING_ENABLED
             };
 
             return objExtendConfig;
