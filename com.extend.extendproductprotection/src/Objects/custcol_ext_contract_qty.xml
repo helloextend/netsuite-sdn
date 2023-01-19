@@ -22,8 +22,8 @@
   <colstore>F</colstore>
   <colstorehidden>F</colstorehidden>
   <colstorewithgroups>F</colstorewithgroups>
-  <coltime>F</coltime>
   <coltransferorder>F</coltransferorder>
+  <columncustomtransactions></columncustomtransactions>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
   <defaultvalue></defaultvalue>
