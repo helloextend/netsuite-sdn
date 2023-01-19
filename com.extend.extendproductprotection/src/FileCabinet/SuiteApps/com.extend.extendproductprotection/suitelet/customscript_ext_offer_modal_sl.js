@@ -13,14 +13,15 @@
  *@NScriptType Suitelet
  *@NModuleScope Public
  */
- define([
+define([
     'N/ui/serverWidget',
     'N/runtime',
     'N/http',
     'N/error',
-    '../lib/customscript_ext_api_lib'
+    '../lib/customscript_ext_api_lib',
+    '../lib/customscript_ext_config_lib'
 ],
-    function (ui, runtime, http, error, api) {
+    function (ui, runtime, http, error, api, EXTEND_CONFIG) {
 
         var exports = {};
 
@@ -62,7 +63,6 @@
                 objExtendItem.stItemId = objRequest.parameters.custpage_item_select;
                 objExtendItem.stItemName = objRequest.parameters.custpage_item_name.trim();
                 objExtendItem.stItemQty = objRequest.parameters.custpage_item_qty;
-                objExtendItem.stRefId = objRequest.parameters.custpage_item_ref_id;
                 objExtendItem.stPlanId = '';
                 objExtendItem.stPrice = 0;
                 objExtendItem.stDescription = '';
@@ -102,7 +102,6 @@
                 html += " if(window.opener) {";
                 html += " window.opener.nlapiSetFieldValue('custbody_ext_warranty_order', true, true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'item'," + objExtendItem.stWarrantyItemId + ", true, true);";
-                html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_item_full_name', '" + objExtendItem.stDescription + "', true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'rate'," + objExtendItem.stPrice + ", true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'quantity'," + objExtendItem.stItemQty + ", true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'description', '" + objExtendItem.stDescription + "', true, true);";
@@ -236,8 +235,8 @@
                 //OFFER TELESALES ASK SCRIPT
                 var objOfferTextField = objForm.addField({
                     id: 'custpage_offer_text',
-                    type: ui.FieldType.RICHTEXT,
-                    label: 'Talk Track:',
+                    type: ui.FieldType.TEXTAREA,
+                    label: 'Customer Ask:',
                     container: 'custpage_script'
                 });
                 objOfferTextField.updateBreakType({
@@ -246,13 +245,7 @@
                 objOfferTextField.updateDisplayType({
                     displayType: ui.FieldDisplayType.INLINE
                 });
-
-                objOfferTextField.defaultValue = "<b>The title shown in the eligible plans below will determine which coverage is available (per product) to purchase.</b><br>" 
-                objOfferTextField.defaultValue += "<u>Extend Protection Plans:</u> Keep your product protected after the manufacturer warranty expires with a plan from Extend.<br><br> "
-                objOfferTextField.defaultValue += "<u>Extend Protection Plans with Accident Coverage:</u> Enjoy hassle-free replacements/repairs if your product experiences a defect or accidental damage.<br><br> "
-                objOfferTextField.defaultValue += "We have several protection plans available for your purchase.<br>" 
-                objOfferTextField.defaultValue += "Would you be interested in protecting your purchase with us today? <br> "
-                objOfferTextField.defaultValue += "<custom training text available>";
+                objOfferTextField.defaultValue = "We have several protection plans available for your purchase \n These protection plans cover accidental damage in addition to standard defects \n Would you be interested in protecting your purchase with us today? \n <custom training text available>";
                 //Next Steps Group
                 var objProcessGroup = objForm.addFieldGroup({
                     id: 'custpage_process',
@@ -271,11 +264,7 @@
                 objProcessScript.updateDisplayType({
                     displayType: ui.FieldDisplayType.INLINE
                 });
-                objProcessScript.defaultValue =  "1. Select an Item from the drop down list to determine eligibility. \n "
-                objProcessScript.defaultValue += "2. Check the box next to the protection plan your customer has selected. \n "
-                objProcessScript.defaultValue += "3. Click on the blue submit button to add the protection plan and return to the order. \n "
-                objProcessScript.defaultValue += "4. If the customer does not want a protection plan, simply click cancel.";
-                
+                objProcessScript.defaultValue = "1. Select an Item from the drop down list \n 2.Check the box next to the protection plan your customer has selected \n 3. Click on the blue submit button to add the protection plan and return to the order \n 4. If the customer does not want a protection plan, simply click cancel";
                 var objItemGroup = objForm.addFieldGroup({
                     id: 'custpage_item',
                     label: 'Item'
@@ -346,15 +335,24 @@
                  */
                 if (stItemRefId) {
                     try {
-                        var objResponse = api.getPlansByItem(stItemRefId);
-                        log.debug('OFFER MODAL SUITELET: Offers JSON Response', JSON.stringify(objResponse));
+                        var config = EXTEND_CONFIG.getConfig();
+                        var objResponse = api.getOffers(stItemRefId, config);
+                        log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
 
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
-                            log.debug('OFFER MODAL SUITELET: Offers JSON Response Body', JSON.stringify(objResponseBody));
+                            log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
 
-                            var arrPlans = objResponseBody.plans;
+                            var objPlans = objResponseBody.plans;
+                            log.debug('OFFER MODAL SUITELET: objPlans', objPlans);
+
+                            var arrPlans = objPlans.base;
                             log.debug('OFFER MODAL SUITELET: arrPlans', arrPlans);
+
+                            if (arrPlans.length == 0) {
+                                var arrPlans = objPlans.adh;
+                            }
+                            log.debug('arrPlans', arrPlans);
 
                             //Populate Sublist Values
                             for (var i = 0; i < arrPlans.length; i++) {
@@ -380,16 +378,18 @@
                                 });
                             }
                         }
+
                     } catch (e) {
-                        log.error("POPULATE SUBLIST", JSON.stringify(e))
+
                     }
+
                 }
                 //Set Client handler
                 objForm.clientScriptModulePath = '../client/customscript_ext_offer_modal_controller.js';
                 //Write Page
                 context.response.writePage(objForm);
             } catch (e) {
-                log.error("_renderForm", JSON.stringify(e))
+
             }
         };
         return exports;

@@ -1,13 +1,13 @@
-<mapreducescript scriptid="customscript_ext_create_contract_mr">
+<mapreducescript scriptid="customscript_ext_create_order_mr">
   <description></description>
   <isinactive>F</isinactive>
-  <name>Extend |  MR | Contract Create</name>
+  <name>Extend |  MR | Order Create</name>
   <notifyadmins>F</notifyadmins>
   <notifyemails></notifyemails>
   <notifyowner>T</notifyowner>
-  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/mapreduce/customscript_ext_create_contract_mr.js]</scriptfile>
+  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/mapreduce/customscript_ext_create_order_mr.js]</scriptfile>
   <scriptcustomfields>
-    <scriptcustomfield scriptid="custscript_ext_so_search">
+    <scriptcustomfield scriptid="custscript_ext_order_search">
       <accesslevel>2</accesslevel>
       <applyformatting>F</applyformatting>
       <checkspelling>F</checkspelling>
@@ -23,7 +23,7 @@
       <help></help>
       <isformula>F</isformula>
       <ismandatory>F</ismandatory>
-      <label>Extend Sales Order Search</label>
+      <label>Extend Orders Search</label>
       <linktext></linktext>
       <maxlength></maxlength>
       <maxvalue></maxvalue>
@@ -36,24 +36,23 @@
     </scriptcustomfield>
   </scriptcustomfields>
   <scriptdeployments>
-    <scriptdeployment scriptid="customdeploy_ext_create_contract_mr">
+    <scriptdeployment scriptid="customdeploy_ext_create_order_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_so_search>[scriptid=customsearch_ext_contract_create]</custscript_ext_so_search>
+      <custscript_ext_order_search>[scriptid=customsearch_ext_order_create]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
-      <loglevel>AUDIT</loglevel>
+      <loglevel>DEBUG</loglevel>
       <queueallstagesatonce>T</queueallstagesatonce>
       <runasrole>ADMINISTRATOR</runasrole>
-      <status>SCHEDULED</status>
-      <title>Extend |  MR | Contract Create</title>
+      <status>NOTSCHEDULED</status>
+      <title>Extend |  MR | Order Create</title>
       <yieldaftermins>60</yieldaftermins>
       <recurrence>
-        <daily>
-          <everyxdays>1</everyxdays>
+        <single>
           <repeat></repeat>
-          <startdate>2022-03-01</startdate>
+          <startdate>2022-06-15</startdate>
           <starttime>01:00:00Z</starttime>
-        </daily>
+        </single>
       </recurrence>
     </scriptdeployment>
   </scriptdeployments>

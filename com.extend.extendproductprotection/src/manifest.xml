@@ -2,7 +2,7 @@
   <publisherid>com.extend</publisherid>
   <projectid>extendproductprotection</projectid>
   <projectname>Extend Product Protection</projectname>
-  <projectversion>1.0.9</projectversion>
+  <projectversion>1.0.0</projectversion>
   <frameworkversion>1.0</frameworkversion>
   <dependencies>
     <features>
@@ -24,11 +24,7 @@
       <feature required="false">WORKORDERS</feature>
       <feature required="false">RECEIVABLES</feature>
       <feature required="false">PAYABLES</feature>
-      <feature required="true">DEPARTMENTS</feature>
-      <feature required="false">CUSTOMSEGMENTS</feature>
       <feature required="false">MATRIXITEMS</feature>
-      <feature required="false">CUSTOMTRANSACTIONS</feature>
-      <feature required="false">WEBSTORE</feature>
     </features>
   </dependencies>
 </manifest>
