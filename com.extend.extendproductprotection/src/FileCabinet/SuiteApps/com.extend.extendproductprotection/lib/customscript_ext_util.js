@@ -540,6 +540,9 @@ var stContractQty = arrContractIDs.length;
                 'lineItems': objValues.lineItems,
                 'total': parseInt(objValues.total_amount * 100),
                 'transactionId': objValues.id,
+                'saleOrigin': {
+                    'integratorId': 'netsuite'
+               }
             }
 
             return objJSON;
