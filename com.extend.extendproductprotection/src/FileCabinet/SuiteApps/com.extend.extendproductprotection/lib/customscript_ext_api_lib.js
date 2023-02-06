@@ -231,7 +231,30 @@
         return;
       }
     };
-
+       /**
+ * ADD SHIPMENT INFO
+ * API Documentation: https://docs.extend.com/reference/lineitemsshipmentadd
+ */
+       exports.addShipmentInfo = function (objOrderDetails, config) {
+        try {
+          var response = https.post({
+            url: config.domain + '/line-items/shipments',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Extend-Access-Token': config.key,
+              'Accept': 'application/json;version=' + config.version,
+            },
+            body: JSON.stringify(objOrderDetails),
+          });
+          if (response) {
+            return response;
+          }
+        } catch (e) {
+          log.debug('Error Calling API', JSON.stringify(e.message));
+          return;
+        }
+      };
+    
     /**
      * REFUND CONTRACT
      * API Documentation: https://docs.extend.com/reference/refundscreate
