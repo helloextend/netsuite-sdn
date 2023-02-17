@@ -1,6 +1,6 @@
-<transactioncolumncustomfield scriptid="custcol_ext_contract_qty">
+<transactioncolumncustomfield scriptid="custcol_ext_line_id">
   <accesslevel>2</accesslevel>
-  <applyformatting>T</applyformatting>
+  <applyformatting>F</applyformatting>
   <colbuild>F</colbuild>
   <colexpense>F</colexpense>
   <colexpensereport>F</colexpensereport>
@@ -33,11 +33,11 @@
   <displaywidth></displaywidth>
   <dynamicdefault></dynamicdefault>
   <encryptatrest>F</encryptatrest>
-  <fieldtype>INTEGER</fieldtype>
+  <fieldtype>TEXT</fieldtype>
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Contract Qty</label>
+  <label>Extend Line ID</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

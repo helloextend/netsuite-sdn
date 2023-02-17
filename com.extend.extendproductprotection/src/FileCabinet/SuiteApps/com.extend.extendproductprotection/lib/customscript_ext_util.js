@@ -332,13 +332,11 @@
                 stUniqueKey = line[1];
 
                 if (arrLineItems[j].type == 'contract') {
-                    log.debug('EXTEND UTIL _createExtendOrder: j loop contractid arrLineItems: ', arrLineItems[j].contractId);
                     if (arrLineItems[j].contractId) {
                         objExtendResponseData[stUniqueKey].contractIds.push(arrLineItems[j].contractId);
                     }
                 }
                 if (arrLineItems[j].type == 'lead') {
-                    log.debug('EXTEND UTIL _createExtendOrder: j loop leadTokens arrLineItems: ', arrLineItems[j].leadToken);
                     if (arrLineItems[j].leadToken) {
                         objExtendResponseData[stUniqueKey].leadTokens.push(arrLineItems[j].leadToken);
                     }
