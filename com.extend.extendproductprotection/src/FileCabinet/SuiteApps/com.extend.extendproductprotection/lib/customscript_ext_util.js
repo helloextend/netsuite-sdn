@@ -351,6 +351,10 @@
 
                 // If Extend contract is created, populate the appropriate custom column field for contracts
                 // on the Sales Order line
+                var stContractIds = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key });
+                var stLeadTokens = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key });
+                log.debug('EXTEND UTIL _createExtendOrder: stContractIds | stLeadTokens: ', stContractIds + '|' + stLeadTokens);
+
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key, value: JSON.stringify(objExtendResponseData[key].leadTokens) });
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: key, value: objExtendResponseData[key].lineItemTransactionId });
@@ -400,9 +404,9 @@
 
             var objExtendItemData = {};
 
-            var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            //var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
             //move extend item to config record instead of param
-              //    var stExtendProductItemId = objExtendConfig.product_plan_item;
+                  var stExtendProductItemId = objExtendConfig.product_plan_item;
                   var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
@@ -510,7 +514,7 @@
                 }
                 else {
                     //get product refId
-                    log.debug('_buildExtendItemJSON: objValues', objValues);
+                                                log.debug('_buildExtendItemJSON: objValues', objValues);
 
                     objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
@@ -588,35 +592,6 @@
         exports.buildExtendFulfillJSON = function (objValues) {
             var objJSON = {
                 'lineItemTransactionId': objValues.lineItemID
-            }
-            return objJSON;
-        };
-        exports.buildExtendShipmentJSON = function(objValues){
-            var objJSON = {
-                'lineItemTransactionId': objValues.lineItemID,
-                'destination': {
-                    'address1': objValues.dest_address1,
-                    'address2': objValues.dest_address2,
-                    'city': objValues.dest_city,
-                    'postalCode': objValues.dest_zip,
-                    'countryCode': objValues.dest_country,
-                    'provinceCode': objValues.dest_state,
-                },
-                'productIds': [
-                    "{{productId}}"
-                ],
-                'shipmentDate': objValues.ship_date,
-                'shippingProvider': objValues.carrier,
-                'source': {
-                    'address1': objValues.source_address1,
-                    'address2': objValues.source_address2,
-                    'city': objValues.source_city,
-                    'postalCode': objValues.source_zip,
-                    'countryCode': objValues.source_country,
-                    'provinceCode': objValues.source_state,
-                },
-                'trackingId': objValues.tracking_number,
-                'trackingUrl': objValues.tracking_url
             }
             return objJSON;
         };
