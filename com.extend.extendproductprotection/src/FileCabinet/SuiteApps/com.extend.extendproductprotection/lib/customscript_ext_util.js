@@ -403,10 +403,7 @@
 
             var objExtendItemData = {};
 
-            //var stExtendProductItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
-            //move extend item to config record instead of param
-                  var stExtendProductItemId = objExtendConfig.product_plan_item;
-                  var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
+            var stExtendProductItemId = objExtendConfig.product_plan_item;
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
@@ -414,15 +411,6 @@
                     objExtendItemData[stUniqueKey] = {};
                 }
                 //Check if item is one of the configured extend items
-                if (stExtendShippingItemId === stItemId) {
-                    //if line is shipping proection
-                    objExtendItemData[stUniqueKey] = {};
-                    objExtendItemData[stUniqueKey].isShipping = true;
-                    // Start building the Extend Order Plan Info Object
-                    objExtendItemData[stUniqueKey].quoteId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_quote_id', line: i });
-                    //set Extend Line Item Transaction ID on Extend Line
-                    objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
-                }
                 if (stExtendProductItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get value of leadtoken column on extend line
@@ -442,17 +430,13 @@
                         objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
                         //set Extend Line Item Transaction ID on Extend Line
                         objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
-                    }
-                    //
-                    else {
+                    }else {
                         //get related item from extend line
                         var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
-
                         for (var j = 0; j < stLineCount; j++) {
                             var stRelatedItem = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
                             if (stRelatedItem === stExtendItemRefId) {
                                 log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stRelatedItem + ' | ' + stExtendItemRefId);
-
                             stUniqueKey = j;
                             // Start building the Extend Order Plan Info Object
                             objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
@@ -466,7 +450,7 @@
                             objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: i, value: stRelatedItemID });
                         }
                     }
-                } else {
+                } }else {
                     // Start building the Extend Order Item Info Object
                     objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                     objExtendItemData[stUniqueKey].itemId = stItemId
@@ -508,7 +492,6 @@
                 }
                 lineItems.push(item);
             }
-              }
                 
             log.debug('_buildExtendItemJSON: lineItems', lineItems);
 
