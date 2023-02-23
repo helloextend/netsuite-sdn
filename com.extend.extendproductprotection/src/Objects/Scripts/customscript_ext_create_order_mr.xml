@@ -56,8 +56,8 @@
       <maxvalue></maxvalue>
       <minvalue></minvalue>
       <onparentdelete>NO_ACTION</onparentdelete>
+            <selectrecordtype>-119</selectrecordtype>
       <searchlevel>2</searchlevel>
-      <selectrecordtype>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration]</selectrecordtype>
       <setting></setting>
       <storevalue>T</storevalue>
     </scriptcustomfield>
@@ -66,7 +66,6 @@
     <scriptdeployment scriptid="customdeploy_ext_create_order_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration.val_399709_t2522354_208]</custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_create]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
@@ -86,7 +85,6 @@
     <scriptdeployment scriptid="customdeploy_ext_order_create_on_demand">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration.val_399709_t2522354_208]</custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_create_2]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
