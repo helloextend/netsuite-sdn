@@ -74,7 +74,7 @@
             //build order data obj
             var objExtendData = {};
             //get fulfillment data
-            objExtendData = exports.getFulfillmentData(objSalesOrderRecord);
+            objExtendData = exports.getFulfillmentData(objSalesOrderRecord, objExtendConfig);
             log.audit('EXTEND UTIL _fulfillExtendOrder: getFulfillmentData objExtendData', objExtendData);
 
             for (key in objExtendData) {
@@ -245,9 +245,9 @@
             log.debug('_getExtendData: Get Extend Data', '**ENTER**');
             var objExtendItemData = {};
 
-            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
+            //var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
             //move extend item to config record instead of param
-            //            var stExtendItemId = objExtendConfig.protection_plan_item;
+            var stExtendItemId = objExtendConfig.product_plan_item;
 
             var stLineCount = objNewRecord.getLineCount({ sublistId: 'item' });
 
@@ -407,7 +407,7 @@
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
-                if (stExtendItemId !== stItemId) {
+                if (stExtendProductItemId !== stItemId) {
                     objExtendItemData[stUniqueKey] = {};
                 }
                 //Check if item is one of the configured extend items

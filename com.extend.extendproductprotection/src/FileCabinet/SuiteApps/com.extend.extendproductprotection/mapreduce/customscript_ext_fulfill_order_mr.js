@@ -56,7 +56,8 @@ define([
                     id: stSalesOrderId
                 });
                 // Get Extend Details from Fulfillment
-                var objExtendConfig = EXTEND_CONFIG.getConfig();
+                var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config');
+                var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
                 objExtendData = EXTEND_UTIL.fulfillExtendOrder(objSalesOrderRecord, stFulfillmentId, objExtendConfig);
 
 
