@@ -15,9 +15,11 @@
     'N/runtime',
     'N/record',
     'N/search',
-    '../lib/customscript_ext_util'
+    '../lib/customscript_ext_util',
+    '../lib/customscript_ext_config_lib'
+
 ],
-    function (runtime, record, search, EXTEND_UTIL) {
+    function (runtime, record, search, EXTEND_UTIL, EXTEND_CONFIG) {
         var exports = {};
 
         exports.getInputData = function () {
@@ -79,7 +81,9 @@
                 }
 
                 //call to refund by line item transaction id
-                objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundData);
+                var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_record');
+                var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
+                objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundData, objExtendConfig);
 
                 //Load associated Saled Order Record
                 // var objRefundRecord = record.load({
@@ -112,7 +116,7 @@
                 })
 
                 objNoteRecord.setValue('transaction', stFulfillmentId);
-                objNoteRecord.setValue('title', 'Extend Error Order Create');
+                objNoteRecord.setValue('title', 'Extend Error Contract Refund');
                 objNoteRecord.setValue('note', JSON.stringify(e.message));
                 var stNoteId = objNoteRecord.save();
                 log.debug('reduce', 'stNoteId: ' + stNoteId);
