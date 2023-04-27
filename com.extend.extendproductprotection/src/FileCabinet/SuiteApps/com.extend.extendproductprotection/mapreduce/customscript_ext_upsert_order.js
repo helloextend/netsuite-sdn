@@ -1,8 +1,8 @@
 /**
- *@name: EXTEND SUITESCRIPT SDK - Create Contract from Fulfillment JS
+ *@name: EXTEND SUITESCRIPT SDK - Upsert Order JS
  *@description: 
- * This script invokes a call to the Extend Contracts POST endpoint whenever
- * an item with a protection plan is fulfilled
+ * This script invokes a call to the Extend Upsert Orders PUT endpoint whenever
+ * an order is modified
  *    
  *@copyright Extend, Inc
  *@author Michael Draper
@@ -11,7 +11,7 @@
  *@NScriptType MapReduceScript
  *@ModuleScope Public
  */
-define([
+ define([
     'N/runtime',
     'N/record',
     'N/search',
@@ -53,7 +53,7 @@ define([
                 // Get Extend Details from Sales Order
                 var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
                 var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
-                objExtendData = EXTEND_UTIL.createExtendOrder(objSalesOrderRecord, objExtendConfig);
+                objExtendData = EXTEND_UTIL.upsertExtendOrder(objSalesOrderRecord, objExtendConfig);
 
             } catch (e) {
                 log.error('reduce', 'key: ' + context.key + ' error: ' + e);

@@ -66,18 +66,6 @@
 
             objSalesOrderRecord.save();
         };
-        //fulfill items on order
-        exports.fulfillExtendOrder = function (objSalesOrderRecord, stFulfillmentId, objExtendConfig) {
-  
-                // Create contract call for quantity fulfilled on the Extend item 
-                    //get extend contract array for line
-                        objExtendData[key].contractIds.push(objExtendResponseBody.contractId);
-
-                //set contract column on SO line
-                objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendData[key].contractIds) });
-
-        };
-
         //refund item by line item transaction id
         exports.refundExtendOrder = function (objRefundData) {
             log.audit('EXTEND UTIL _refundExtendOrder:', '**ENTER**');
@@ -225,6 +213,7 @@
             log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData', objExtendResponseData);
 
             for (key in objExtendResponseData) {
+
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].contractIds: ', key + '|' + objExtendResponseData[key].contractIds);
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].leadTokens: ', key + '|' + objExtendResponseData[key].leadTokens);
                 log.debug('EXTEND UTIL _createExtendOrder: objExtendResponseData[key].lineItemTransactionId: ', key + '|' + objExtendResponseData[key].lineItemTransactionId);
@@ -233,7 +222,10 @@
                 // on the Sales Order line
                 var stContractIds = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key });
                 var stLeadTokens = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key });
-                log.debug('EXTEND UTIL _createExtendOrder: stContractIds | stLeadTokens: ', stContractIds + '|' + stLeadTokens);
+                log.debug('EXTEND UTIL _createExtendOrder: stContractIds | stLeadTokens: ', stContractIds + '|' + stLeadTokens + typeof stContractIds);
+var newContractIds = objExtendResponseData[key].contractIds.push(stContractIds);
+objExtendResponseData[key].leadTokens.push(stLeadTokens);
+log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', newContractIds + '|' + stLeadTokens + typeof newContractIds);
 
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key, value: JSON.stringify(objExtendResponseData[key].leadTokens) });
