@@ -186,7 +186,32 @@
       }
     };
     /*****************************************ORDERS*****************************************/
-
+    /**
+     * UPSERT ORDER
+     * API Documentation: https://docs.extend.com/reference/ordersupsert
+     */
+    exports.upsertOrder = function (objOrderDetails, config) {
+      // var config = extendConfig.getConfig();
+ 
+       try {
+         var response = https.put({
+           url: config.domain + '/orders',
+           headers: {
+             'Content-Type': 'application/json',
+             'X-Extend-Access-Token': config.key,
+             'Accept': 'application/json;version=' + config.version,
+             'X-Idempotency-Key': exports.generateUUID()
+           },
+           body: JSON.stringify(objOrderDetails),
+         });
+         if (response) {
+           return response;
+         }
+       } catch (e) {
+         log.debug('Error Calling API', JSON.stringify(e.message));
+         return;
+       }
+     };
     /**
      * CREATE ORDER
      * API Documentation: https://docs.extend.com/reference/orderscreate
