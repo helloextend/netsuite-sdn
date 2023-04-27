@@ -175,60 +175,6 @@
         };
 
         /***********************************Support Functions********************************************/
-        exports.getFulfillmentData = function (objNewRecord, objExtendConfig) {
-            log.debug('_getExtendData: Get Extend Data', '**ENTER**');
-            var objExtendItemData = {};
-
-            var stExtendItemId = runtime.getCurrentScript().getParameter('custscript_ext_protection_plan');
-            //move extend item to config record instead of param
-            //            var stExtendItemId = objExtendConfig.protection_plan_item;
-
-            var stLineCount = objNewRecord.getLineCount({ sublistId: 'item' });
-
-            for (var i = 0; i < stLineCount; i++) {
-                var stItemId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
-                //Check if item is one of the configured extend items
-                if (stExtendItemId === stItemId) {
-                    log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
-                    //get qty of contracts created & compare to extend item qty
-                    var stContractIDs = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i });
-                    var arrContractIDs = JSON.parse(stContractIDs);
-                    log.debug('_getExtendData: stContractID', arrContractIDs + '|' + typeof arrContractIDs);
-                    // var arrContracyQty = JSON.parse(objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: i }));
-                    var stExtendItemQty = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-
-                    if (arrContractIDs.length < stExtendItemQty) {
-                        var stContractQty = arrContractIDs.length;
-                        //get related item from extend line
-                        var stExtendItemRefId = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
-                        //check for new fulfillments
-                        for (var j = 0; j < stLineCount; j++) {
-                            var stRelatedItem = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
-                            if (stRelatedItem === stExtendItemRefId) {
-
-                                var stRelatedItemQtyFulfilled = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: j });
-                                if (stContractQty <= stExtendItemQty && stRelatedItemQtyFulfilled > stContractQty) {
-
-                                    var stUniqueKey = i;
-                                    // Start building the Extend Order Info Object
-                                    objExtendItemData[stUniqueKey] = {};
-                                    objExtendItemData[stUniqueKey].quantity = Math.min(stRelatedItemQtyFulfilled, (stExtendItemQty - stContractQty));
-                                    objExtendItemData[stUniqueKey].line = i;
-                                    objExtendItemData[stUniqueKey].lineItemID = objNewRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_line_id', line: i });
-                                    objExtendItemData[stUniqueKey].contractIds = arrContractIDs;
-
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-
-            log.debug('_getExtendData: return objExtendItemData', objExtendItemData);
-
-            return objExtendItemData
-        };
         exports.handleOrderResponse = function (objExtendResponseBody, objSalesOrderRecord) {
 
             log.debug('EXTEND UTIL _createExtendOrder: Extend Response Body Parsed: ', objExtendResponseBody);
@@ -409,6 +355,7 @@
                 else {
                     // Start building the Extend Order Item Info Object
                     objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                    objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: i });
                     objExtendItemData[stUniqueKey].itemId = stItemId
                     objExtendItemData[stUniqueKey].line = i;
                     objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
@@ -447,8 +394,7 @@
                 }
                 else {
                     //get product refId
-                                                log.debug('_buildExtendItemJSON: objValues', objValues);
-
+                    log.debug('_buildExtendItemJSON: objValues', objValues);
                     objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
                         'product': {
@@ -456,8 +402,8 @@
                             // 'serialNumber': objValues.serial_number,
                             'purchasePrice': objValues[key].purchase_price
                         },
-                        'status': 'unfulfilled',
                         'quantity': objValues[key].quantity,
+                        'fulfilledQuantity': objValues[key].fulfilledQuantity,
                         'lineItemTransactionId': objValues[key].lineItemID
                     }
                     if (objValues[key].extend_plan_id && objValues[key].plan_price) {
@@ -519,13 +465,6 @@
                 'transactionId': objValues.id,
             }
 
-            return objJSON;
-        };
-        // Build the Extend API JSON for line fulfillment
-        exports.buildExtendFulfillJSON = function (objValues) {
-            var objJSON = {
-                'lineItemTransactionId': objValues.lineItemID
-            }
             return objJSON;
         };
         // Build the Extend API JSON for shipment info
