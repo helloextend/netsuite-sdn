@@ -12,7 +12,7 @@ define([
             SANDBOX: 1,
             PRODUCTION: 2
         }
-        exports.getConfig = function (stExtendConfigRecId) {
+        exports.getConfig = function () {
             //Get storeId & APIkey from config custom record
 
             var STORE_ID;
@@ -22,10 +22,11 @@ define([
             var EMAIL;
             var ENVIRONMENT = 'demo';
             var PRODUCT_ITEM;
+            var SHIPPING_ITEM;
             var DOMAIN = 'https://api-demo.helloextend.com';
 
 
-            //var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
+            var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
             log.debug('_getConfig: stExtendConfigRecId ', stExtendConfigRecId);
 
             var arrFilters = ["internalId", "is", stExtendConfigRecId];
@@ -44,6 +45,7 @@ define([
                         search.createColumn({ name: "custrecord_ext_store_id", label: "Store ID" }),
                         search.createColumn({ name: "custrecord_ext_ref_id", label: "Ref ID" }),
                         search.createColumn({ name: "custrecord_ext_pp_item", label: "Product Protection Item" }),
+                        search.createColumn({ name: "custrecord_ext_sp_item", label: "Shipping Protection Item" }),
 
                     ]
             });
@@ -71,6 +73,7 @@ define([
                     API_VERSION = result.getValue({ name: 'custrecord_ext_api_version' });
                 }
                 PRODUCT_ITEM = result.getValue({ name: 'custrecord_ext_pp_item' });
+                SHIPPING_ITEM = result.getValue({ name: 'custrecord_ext_sp_item' });
 
                 return true;
             });
@@ -84,7 +87,7 @@ define([
                 email: EMAIL, //IMPORTATN: SB and Testing environemnts requires manual assignment of a test email
                 refId: REF_ID,
                 product_plan_item: PRODUCT_ITEM,
-
+                shipping_plan_item: SHIPPING_ITEM,
             };
 
             return objExtendConfig;
