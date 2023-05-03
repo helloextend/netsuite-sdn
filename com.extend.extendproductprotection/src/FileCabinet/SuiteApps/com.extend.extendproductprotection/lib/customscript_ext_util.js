@@ -42,7 +42,7 @@
             var objExtendResponse = EXTEND_API.upsertOrder(objExtendOrderRequestJSON, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: Extend Response Object: ', objExtendResponse);
             //handle response
-            if (objExtendResponse.code === 201) {
+            if (objExtendResponse.code === 201 || objExtendResponse.code === 200 ) {
                 var objExtendResponseBody = JSON.parse(objExtendResponse.body);
                 exports.handleOrderResponse(objExtendResponseBody, objSalesOrderRecord);
                 //make SO as extend order created
@@ -223,9 +223,15 @@
                 var stContractIds = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key });
                 var stLeadTokens = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key });
                 log.debug('EXTEND UTIL _createExtendOrder: stContractIds | stLeadTokens: ', stContractIds + '|' + stLeadTokens + typeof stContractIds);
-var newContractIds = objExtendResponseData[key].contractIds.push(stContractIds);
-objExtendResponseData[key].leadTokens.push(stLeadTokens);
-log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', newContractIds + '|' + stLeadTokens + typeof newContractIds);
+if(stContractIds){
+    var objContractIds = JSON.parse(stContractIds);
+    objExtendResponseData[key].contractIds.push(objContractIds);
+}
+if(stLeadTokens){
+    var objLeadTokens = JSON.parse(stLeadTokens);
+    objExtendResponseData[key].leadTokens.push(objLeadTokens);
+}
+log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', objExtendResponseData[key].contractIds + '|' + objExtendResponseData[key].leadTokens + typeof objExtendResponseData[key].leadTokens);
 
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_contract_id', line: key, value: JSON.stringify(objExtendResponseData[key].contractIds) });
                 objSalesOrderRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: key, value: JSON.stringify(objExtendResponseData[key].leadTokens) });
@@ -247,7 +253,7 @@ log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', new
             var objShipAddress = exports.getAddress(objSalesOrderRecord, 'shippingaddress');
             var objBillAddress = exports.getAddress(objSalesOrderRecord, 'billingaddress');
             //Build SO Info Object
-            objExtendData.id = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
+            objExtendData.id = objSalesOrderRecord.id + objSalesOrderRecord.getValue({ fieldId: 'tranid' });
             objExtendData.tran_date = exports.getepochDate();
             objExtendData.currency = 'USD';
             objExtendData.order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
@@ -280,6 +286,8 @@ log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', new
             //move extend item to config record instead of param
                   var stExtendProductItemId = objExtendConfig.product_plan_item;
                   var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
+                  log.debug('_getExtendData: stExtendShippingItemId ', stExtendShippingItemId);
+
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
@@ -378,9 +386,10 @@ log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', new
                             'purchasePrice': objValues[key].plan_price
                         }
                     }
-                } else if (objValues.isShipping) {
+                } else if (objValues[key].isShipping) {
                     var item = {
                         "quoteId": objValues[key].quoteId,
+                        'lineItemTransactionId': objValues[key].lineItemID,
                         "shipmentInfo": []
                     }
                 }
