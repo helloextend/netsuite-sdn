@@ -1,10 +1,6 @@
 <!-- This XML must be system-generated. Do not edit it manually. !-->
 <savedsearch scriptid="customsearch_ext_order_refund">
   <dependencies>
-    <dependency>[bundleid=13201, scriptid=custbody_promisedate]</dependency>
-    <dependency>[scriptid=custbody18]</dependency>
-    <dependency>[scriptid=custbody19]</dependency>
-    <dependency>[scriptid=custbody_cust_priority]</dependency>
     <dependency>[scriptid=custcol_ext_canceled_contract_ids]</dependency>
     <dependency>[scriptid=custcol_ext_contract_id]</dependency>
     <dependency>[scriptid=custcol_ext_line_id]</dependency>

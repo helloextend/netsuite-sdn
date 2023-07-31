@@ -32,6 +32,8 @@ define([
             var objExtendItemData = exports.getSalesOrderItemInfo(objSalesOrderRecord, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendItemData', objExtendItemData);
             //format items
+            objExtendData.shipmentInfo = exports.buildExtendShipmentJSON(objExtendItemData, objExtendConfig);
+            log.audit('EXTEND UTIL _createExtendOrder: objExtendData', objExtendData);
             objExtendData.lineItems = exports.buildExtendItemJSON(objExtendItemData, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendData', objExtendData);
 
@@ -259,6 +261,8 @@ define([
             objExtendData.currency = 'USD';
             objExtendData.order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
             objExtendData.total_amount = objSalesOrderRecord.getValue({ fieldId: 'total' });
+            objExtendData.shipping_total_amount = objSalesOrderRecord.getValue({ fieldId: 'shippingcost' });
+            objExtendData.tax_total_amount = objSalesOrderRecord.getValue({ fieldId: 'taxtotal' });
             objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
             objExtendData.email = objCustomerInfo.email;
             objExtendData.phone = objCustomerInfo.phone;
@@ -304,6 +308,7 @@ define([
                     objExtendItemData[stUniqueKey].quoteId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_quote_id', line: i });
                     //set Extend Line Item Transaction ID on Extend Line
                     objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
+                    objExtendItemData[stUniqueKey].shipmentInfo = objSalesOrderRecord.getValue({ fieldId: 'linkedtrackingnumbers' });
                 }
                 if (stExtendProductItemId === stItemId) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
@@ -391,7 +396,7 @@ define([
                     var item = {
                         "quoteId": objValues[key].quoteId,
                         'lineItemTransactionId': objValues[key].lineItemID,
-                        "shipmentInfo": []
+                        "shipmentInfo": objValues[key].shipmentInfo
                     }
                 }
                 else {
@@ -464,6 +469,8 @@ define([
                 'storeId': objExtendConfig.storeId,
                 'lineItems': objValues.lineItems,
                 'total': parseInt(objValues.total_amount * 100),
+                'shippingCostTotal': parseInt(objValues.shipping_total_amount * 100),
+                'taxCostTotal': parseInt(objValues.tax_total_amount * 100),
                 'transactionId': objValues.id,
             }
 
@@ -471,15 +478,36 @@ define([
         };
         // Build the Extend API JSON for shipment info
         exports.buildExtendShipmentJSON = function (objValues) {
+            var shipmentInfo = [];
+            for (key in objValues) {
             var objJSON = {
-                'lineItemTransactionId': objValues.lineItemID,
-                'productIds': objValues.prodcutIds,
-                'shipmentDate': objValues.lineItemID,
-                'shippingProvider': objValues.carrier,
-                'trackingId': objValues.trackingId,
-                'trackingUrl': objValues.trackingUrl
+                'lineItemTransactionId': objValues[key].lineItemID,
+                'productIds': objValues[key].prodcutIds,
+                'shipmentDate': objValues[key].lineItemID,
+                'shippingProvider': objValues[key].carrier,
+                'trackingId': objValues[key].trackingId,
+                'trackingUrl': objValues[key].trackingUrl,
+                'destination': {
+                    'address1': objValues[key].dest_address1,
+                    'address2': objValues[key].dest_address2,
+                    'city': objValues[key].dest_city,
+                    'postalCode': objValues[key].dest_zip,
+                    'countryCode': objValues[key].dest_country,
+                    'province': objValues[key].dest_state,
+                },
+                'source': {
+                    'address1': objValues[key].source_address1,
+                    'address2': objValues[key].source_address2,
+                    'city': objValues[key].source_city,
+                    'postalCode': objValues[key].source_zip,
+                    'countryCode': objValues[key].source_country,
+                    'province': objValues[key].source_state,
+                }
             }
-            return objJSON;
+            shipmentInfo.push(objJSON);
+
+        }
+            return shipmentInfo;
         };
         /***********************************Support Functions********************************************/
         //get Address Subrecord fields from transaction 
