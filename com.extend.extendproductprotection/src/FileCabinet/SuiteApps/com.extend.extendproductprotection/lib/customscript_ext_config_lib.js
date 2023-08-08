@@ -73,6 +73,8 @@ define([
                     API_VERSION = result.getValue({ name: 'custrecord_ext_api_version' });
                 }
                 PRODUCT_ITEM = result.getValue({ name: 'custrecord_ext_pp_item' });
+                log.debug('_getConfig: PRODUCT_ITEM ', typeof PRODUCT_ITEM);
+
                 SHIPPING_ITEM = result.getValue({ name: 'custrecord_ext_sp_item' });
 
                 return true;

@@ -15,8 +15,8 @@
     'N/runtime',
     'N/record',
     'N/search',
-    '../lib/customscript_ext_util',
-    '../lib/customscript_ext_config_lib'
+    '../libs/customscript_ext_util',
+    '../libs/customscript_ext_config_lib'
 
 ],
     function (runtime, record, search, EXTEND_UTIL, EXTEND_CONFIG) {

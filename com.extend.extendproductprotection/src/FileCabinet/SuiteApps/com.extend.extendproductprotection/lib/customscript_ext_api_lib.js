@@ -5,7 +5,7 @@
  */
  define([
   'N/https',
-  '../lib/customscript_ext_config_lib'
+  '../libs/customscript_ext_config_lib'
 ],
 
   //todo add additional extend API calls
