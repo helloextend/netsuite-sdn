@@ -299,12 +299,15 @@ define([
             arrExtendProductItemId = objExtendConfig.product_plan_item.split(',');
             var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             log.debug('_getExtendData: stExtendShippingItemId ', stExtendShippingItemId);
-            log.debug('_getExtendData: arrExtendProductItemId type ',typeof arrExtendProductItemId);
+            log.debug('_getExtendData: arrExtendProductItemId type ', typeof arrExtendProductItemId);
 
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
+                //group item logic
+                var bInGroup = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'ingroup', line: i });
                 stUniqueKey = i;
                 log.debug('_getExtendData: arrExtendProductItemId.indexOf(stItemId) ', arrExtendProductItemId.indexOf(stItemId));
+                if (bInGroup) continue;
 
                 if (!objExtendItemData[stUniqueKey] && arrExtendProductItemId.indexOf(stItemId) == -1) {
                     objExtendItemData[stUniqueKey] = {};
@@ -320,7 +323,7 @@ define([
                     objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
                     objExtendItemData[stUniqueKey].shipmentInfo = objSalesOrderRecord.getValue({ fieldId: 'linkedtrackingnumbers' });
                 }
-                if (arrExtendProductItemId.indexOf(stItemId)!= -1) {
+                if (arrExtendProductItemId.indexOf(stItemId) != -1) {
                     log.debug('_getExtendData: Item Found | Line ', stItemId + ' | ' + i);
                     //get value of leadtoken column on extend line
                     var stLeadToken = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_lead_token', line: i });
@@ -358,14 +361,14 @@ define([
                                 // Start building the Extend Order Plan Info Object
                                 objExtendItemData[stUniqueKey].plan_quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                                 objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
-                                log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].extend_plan_id  ', i + ' | ' + objExtendItemData[stUniqueKey].extend_plan_id );
+                                log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].extend_plan_id  ', i + ' | ' + objExtendItemData[stUniqueKey].extend_plan_id);
                                 objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
                                 objExtendItemData[stUniqueKey].extend_line = "" + i;
                                 objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
-                                if(!objExtendItemData[stUniqueKey].plan_price){
-                                    objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i })/objExtendItemData[stUniqueKey].plan_quantity * 100);
+                                if (!objExtendItemData[stUniqueKey].plan_price) {
+                                    objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i }) / objExtendItemData[stUniqueKey].plan_quantity * 100);
                                 }
-                                log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].plan_price  ', i + ' | ' + objExtendItemData[stUniqueKey].plan_price );
+                                log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].plan_price  ', i + ' | ' + objExtendItemData[stUniqueKey].plan_price);
                                 //set Extend Line Item Transaction ID of related product on Extend Line
                                 objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
                                 var stRelatedItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
@@ -374,51 +377,53 @@ define([
                         }
                     }
                 }
-
                 else {
                     var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: i });
                     objExtendItemData[stUniqueKey].itemId = stItemId
                     objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                     objExtendItemData[stUniqueKey].line = i;
 
-                    if(stItemType === 'Group'){
-                        var k = i+1;
-                        log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k );
+                    if (stItemType === 'Group') {
+                        var k = i;
+                        log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k);
 
                         //loop through group until 'endgroup'
-while(stItemType !== 'EndGroup'){
-    log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k );
+                        while (stItemType !== 'EndGroup') {
 
-    var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: k });
-    objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: k });
+                            var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: k });
+                            if (stItemType !== 'EndGroup') {
+                                objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: k });
+                            }
+                            objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: k }) * 100);
+                            if (!objExtendItemData[stUniqueKey].purchase_price) {
 
-    k++;
+                                objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: k }) / objExtendItemData[stUniqueKey].quantity * 100);
+                            }
 
-    //for group item
-    //item = itemtype = group
-    //quantity at itemtype = group
-    //fulfilled at part level
-    //price at itemtype = endgroup
+                            k++;
 
-   // stItemType === 'EndGroup'
-}
-log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k );
-objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: k }) * 100);
-if(!objExtendItemData[stUniqueKey].purchase_price){
-    objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: k })/objExtendItemData[stUniqueKey].quantity * 100);
-}
-log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', k + ' | ' + objExtendItemData[stUniqueKey].purchase_price );
+                            //for group item
+                            //item = itemtype = group
+                            //quantity at itemtype = group
+                            //fulfilled at part level
+                            //price at itemtype = endgroup
 
-//if ingroup but not type group skip
+                            // stItemType === 'EndGroup'
+                        }
+                        log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k);
+
+                        //if ingroup but not type group skip
+                    } else {
+                        log.debug('_getExtendData: i| stItemType  ', i + ' | ' + stItemType);
+                        // Start building the Extend Order Item Info Object
+                        objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: i });
+                        objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
+                        if (!objExtendItemData[stUniqueKey].purchase_price) {
+                            objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i }) / objExtendItemData[stUniqueKey].quantity * 100);
+                        }
+                        log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', i + ' | ' + objExtendItemData[stUniqueKey].purchase_price);
+
                     }
-                    log.debug('_getExtendData: i| stItemType  ', i + ' | ' + stItemType);
-                    // Start building the Extend Order Item Info Object
-                    objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: i });
-                    objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
-                    if(!objExtendItemData[stUniqueKey].purchase_price){
-                        objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i })/objExtendItemData[stUniqueKey].quantity * 100);
-                    }
-                    log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', i + ' | ' + objExtendItemData[stUniqueKey].purchase_price );
                     objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
                     if (objExtendItemData[stUniqueKey].extend_line) {
                         objExtendItemData[stUniqueKey].lineItemID = objExtendItemData[stUniqueKey].lineItemID + "-" + objExtendItemData[stUniqueKey].extend_line;
@@ -451,7 +456,7 @@ log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', 
                         "quoteId": objValues[key].quoteId,
                         'lineItemTransactionId': objValues[key].lineItemID,
                         "shipmentInfo": []
-//                        "shipmentInfo": objValues[key].shipmentInfo
+                        //                        "shipmentInfo": objValues[key].shipmentInfo
                     }
                 }
                 else {
@@ -536,33 +541,33 @@ log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', 
         exports.buildExtendShipmentJSON = function (objValues) {
             var shipmentInfo = [];
             for (key in objValues) {
-            var objJSON = {
-                'lineItemTransactionId': objValues[key].lineItemID,
-                'productIds': objValues[key].prodcutIds,
-                'shipmentDate': objValues[key].lineItemID,
-                'shippingProvider': objValues[key].carrier,
-                'trackingId': objValues[key].trackingId,
-                'trackingUrl': objValues[key].trackingUrl,
-                'destination': {
-                    'address1': objValues[key].dest_address1,
-                    'address2': objValues[key].dest_address2,
-                    'city': objValues[key].dest_city,
-                    'postalCode': objValues[key].dest_zip,
-                    'countryCode': objValues[key].dest_country,
-                    'province': objValues[key].dest_state,
-                },
-                'source': {
-                    'address1': objValues[key].source_address1,
-                    'address2': objValues[key].source_address2,
-                    'city': objValues[key].source_city,
-                    'postalCode': objValues[key].source_zip,
-                    'countryCode': objValues[key].source_country,
-                    'province': objValues[key].source_state,
+                var objJSON = {
+                    'lineItemTransactionId': objValues[key].lineItemID,
+                    'productIds': objValues[key].prodcutIds,
+                    'shipmentDate': objValues[key].lineItemID,
+                    'shippingProvider': objValues[key].carrier,
+                    'trackingId': objValues[key].trackingId,
+                    'trackingUrl': objValues[key].trackingUrl,
+                    'destination': {
+                        'address1': objValues[key].dest_address1,
+                        'address2': objValues[key].dest_address2,
+                        'city': objValues[key].dest_city,
+                        'postalCode': objValues[key].dest_zip,
+                        'countryCode': objValues[key].dest_country,
+                        'province': objValues[key].dest_state,
+                    },
+                    'source': {
+                        'address1': objValues[key].source_address1,
+                        'address2': objValues[key].source_address2,
+                        'city': objValues[key].source_city,
+                        'postalCode': objValues[key].source_zip,
+                        'countryCode': objValues[key].source_country,
+                        'province': objValues[key].source_state,
+                    }
                 }
-            }
-            shipmentInfo.push(objJSON);
+                shipmentInfo.push(objJSON);
 
-        }
+            }
             return shipmentInfo;
         };
         /***********************************Support Functions********************************************/
@@ -611,10 +616,10 @@ log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].purchase_price  ', 
 
                 for (var prop in arrItemLookup) {
                     var stItemRefId = arrItemLookup[prop][0].text;
-                    if(!stItemRefId){
+                    if (!stItemRefId) {
                         var stItemRefId = arrItemLookup[prop];
                     }
-                    
+
                     break;
                 }
             }
