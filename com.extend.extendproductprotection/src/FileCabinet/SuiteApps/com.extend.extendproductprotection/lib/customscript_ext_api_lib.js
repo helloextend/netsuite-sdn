@@ -4,12 +4,10 @@
  * @NApiVersion 2.1
  */
  define([
-  'N/https',
-  '../lib/customscript_ext_config_lib'
-],
+  'N/https'],
 
   //todo add additional extend API calls
-  function (https, extendConfig) {
+  function (https) {
 
     var exports = {};
 

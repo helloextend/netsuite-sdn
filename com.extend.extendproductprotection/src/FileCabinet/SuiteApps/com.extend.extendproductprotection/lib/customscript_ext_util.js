@@ -8,12 +8,11 @@ define([
     'N/search',
     'N/record',
     'N/error',
-    'N/log',
     '../lib/customscript_ext_api_lib',
     '../lib/customscript_ext_config_lib'
 
 ],
-    function (runtime, search, record, error, log, EXTEND_API, EXTEND_CONFIG) {
+    function (runtime, search, record, error, EXTEND_API, EXTEND_CONFIG) {
         var exports = {};
         /**
          * Order Functions

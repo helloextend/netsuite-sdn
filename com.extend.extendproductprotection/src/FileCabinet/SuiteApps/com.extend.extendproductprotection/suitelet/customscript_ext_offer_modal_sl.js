@@ -19,9 +19,11 @@
     'N/http',
     'N/error',
     'N/log',
-    '../lib/customscript_ext_api_lib'
+    '../lib/customscript_ext_api_lib',
+       '../lib/customscript_ext_config_lib'
+
 ],
-    function (ui, runtime, http, error, log, EXTEND_API) {
+    function (ui, runtime, http, error, log, EXTEND_API, EXTEND_CONFIG) {
 
         var exports = {};
 
@@ -54,7 +56,10 @@
                 var objExtendItem = {};
 
                 var stPlanCount = objRequest.getLineCount({ group: 'custpage_plans' });
-                objExtendItem.stWarrantyItemId = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+               // objExtendItem.stWarrantyItemId = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+              //var extendConfigRec = 
+objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
+;
 
                 //Line Number
                 // var stProductLine = objRequest.parameters.custpage_line_num;
@@ -270,12 +275,7 @@
                     id: 'custpage_item',
                     label: 'Item'
                 });
-                var objLeadTokenInputField = objForm.addField({
-                    id: 'custpage_lead_input',
-                    type: ui.FieldType.TEXT,
-                    label: 'Input Lead Token',
-                    container: 'custpage_item'
-                });
+
                 var objItemSelectField = objForm.addField({
                     id: 'custpage_item_select',
                     type: ui.FieldType.SELECT,
@@ -292,6 +292,12 @@
                 if (stItemInternalId) {
                     objItemSelectField.defaultValue = stItemInternalId;
                 }
+                              var objLeadTokenInputField = objForm.addField({
+                    id: 'custpage_lead_input',
+                    type: ui.FieldType.TEXT,
+                    label: 'Input Lead Token',
+                    container: 'custpage_item'
+                });
                 /**
                  * BUILD SUBLIST 
                  */
@@ -342,15 +348,20 @@
                  */
                 if (stItemRefId) {
                     try {
-                        var objResponse = EXTEND_API.getPlansByItem(stItemRefId);
+                      var config = EXTEND_CONFIG.getConfig(1);
+
+                        var objResponse = EXTEND_API.getOffers(stItemRefId, config);
                         log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
 
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
                             log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponseBody);
 
-                            var arrPlans = objResponseBody.plans;
+                            var arrPlans = objResponseBody.plans.adh;
                             log.debug('OFFER MODAL SUITELET: arrPlans', arrPlans);
+                          if(!arrPlans){
+                            var arrPlans = objResponseBody.plans.base;
+                          }
 
                             //Populate Sublist Values
                             for (var i = 0; i < arrPlans.length; i++) {

@@ -4,10 +4,9 @@
  */
 define([
     'N/runtime',
-    'N/log',
     'N/search'
 ],
-    function (runtime, log, search) {
+    function (runtime, search) {
         var exports = {};
         const objExtendEnvironment = {
             SANDBOX: 1,

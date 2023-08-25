@@ -16,12 +16,11 @@ define([
     'N/url',
     'N/runtime',
     'N/search',
-    'N/log',
     'N/currentRecord',
     '../lib/customscript_ext_util',
     '../lib/customscript_ext_config_lib'
 ],
-    function (url, runtime, search,log, currentRecord, EXTEND_UTIL, EXTEND_CONFIG) {
+    function (url, runtime, search, currentRecord, EXTEND_UTIL, EXTEND_CONFIG) {
         var exports = {};
         exports.pageInit = function () {
 
@@ -47,13 +46,16 @@ console.log('Validating Line', context)
 
             console.log('Handling Input', context);
            // console.log('Sublist', context.currentRecord.getCurrentSublistValue({ sublistId: context.sublistId }));
-           // console.log('config', EXTEND_CONFIG.getConfig());
-            var refIdValue = '' //EXTEND_CONFIG.getConfig().refId;
+            console.log('config', 'getting.....');
+          var config = EXTEND_CONFIG.getConfig(1);
+                      console.log('config', config);
+
+            var refIdValue = config.refId;
 
             var objCurrentRecord = context.currentRecord;
 
             var arrItemList = [];
-            var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+            var stExtendItem = config.product_plan_item;
 
             var stItemId = objCurrentRecord.getCurrentSublistValue({
                 sublistId: context.sublistId,
@@ -85,8 +87,22 @@ console.log('Validating Line', context)
                     id: stItemId,
                     columns: refIdValue
                 });
+              console.log('arrItemLookup', arrItemLookup)
                 for (var prop in arrItemLookup) {
                     var stItemRefId = arrItemLookup[prop];
+                  if(!stItemRefId){
+                    var stItemRefId = arrItemLookup[prop][0].text;
+                  }
+                                      var arrItemRefId = stItemRefId.split(": ");
+                                console.log('arrItemRefId', arrItemRefId)
+
+                  if(arrItemRefId.length > 1){
+                    stItemRefId = arrItemRefId[1]
+                                                    console.log('stItemRefId', stItemRefId)
+
+                  }
+                                console.log('stItemRefId', stItemRefId)
+
                     break;
                 }
             }
@@ -120,12 +136,16 @@ console.log('Validating Line', context)
                 sublistId: stSublistId
             });
             console.log('linecount', linecount);
-            console.log('config', EXTEND_CONFIG.getConfig());
-            var refIdValue = EXTEND_CONFIG.getConfig().refId;
-            //get extend item
-            var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+           console.log('config', 'getting.....');
+          var config = EXTEND_CONFIG.getConfig(1);
+                      console.log('config', config);
 
-            //loop item sublist 
+            var refIdValue = config.refId;
+          var stExtendItem = config.product_plan_item;
+            //get extend item
+           // var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+
+            //loop item sublist or retrieve for single line item if validate line function
             for (var i = 0; i < linecount; i++) {
                 var stItemId = objCurrentRecord.getSublistValue({
                     sublistId: stSublistId,
@@ -151,11 +171,25 @@ console.log('Validating Line', context)
                         id: stItemId,
                         columns: refIdValue
                     });
+              console.log('arrItemLookup', arrItemLookup)
+                for (var prop in arrItemLookup) {
+                    var stItemRefId = arrItemLookup[prop];
+                  if(!stItemRefId){
+                    var stItemRefId = arrItemLookup[prop][0].text;
+                  }
 
-                    for (var prop in arrItemLookup) {
-                        var stItemRefId = arrItemLookup[prop];
-                        break;
-                    }
+                    var arrItemRefId = stItemRefId.split(": ");
+                                console.log('arrItemRefId', arrItemRefId)
+
+                  if(arrItemRefId.length > 1){
+                    stItemRefId = arrItemRefId[1]
+                                                    console.log('stItemRefId', stItemRefId)
+
+                  }
+                                console.log('stItemRefId', stItemRefId)
+
+                    break;
+                }
                 }
 
                 var objItem = {};
