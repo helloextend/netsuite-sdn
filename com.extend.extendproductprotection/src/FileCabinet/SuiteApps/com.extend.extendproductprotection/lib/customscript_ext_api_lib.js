@@ -3,7 +3,7 @@
  * Houses calls to Extend API
  * @NApiVersion 2.1
  */
- define([
+define([
   'N/https',
   '../libs/customscript_ext_config_lib'
 ],
