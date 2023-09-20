@@ -1,4 +1,4 @@
-<transactioncolumncustomfield scriptid="custcol_ext_quote_id">
+<transactioncolumncustomfield scriptid="custcol_ext_contract_canceled_id">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
   <colbuild>F</colbuild>
@@ -6,9 +6,9 @@
   <colexpensereport>F</colexpensereport>
   <colgrouponinvoices>F</colgrouponinvoices>
   <colinventoryadjustment>F</colinventoryadjustment>
-  <colitemfulfillment>T</colitemfulfillment>
+  <colitemfulfillment>F</colitemfulfillment>
   <colitemfulfillmentorder>F</colitemfulfillmentorder>
-  <colitemreceipt>F</colitemreceipt>
+  <colitemreceipt>T</colitemreceipt>
   <colitemreceiptorder>F</colitemreceiptorder>
   <coljournal>F</coljournal>
   <colkititem>F</colkititem>
@@ -37,7 +37,7 @@
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Quote ID</label>
+  <label>Extend Contract Canceled ID</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

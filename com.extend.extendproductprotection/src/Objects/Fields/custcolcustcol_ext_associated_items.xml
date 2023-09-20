@@ -1,4 +1,4 @@
-<transactioncolumncustomfield scriptid="custcol_ext_quote_id">
+<transactioncolumncustomfield scriptid="custcolcustcol_ext_associated_items">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
   <colbuild>F</colbuild>
@@ -11,17 +11,17 @@
   <colitemreceipt>F</colitemreceipt>
   <colitemreceiptorder>F</colitemreceiptorder>
   <coljournal>F</coljournal>
-  <colkititem>F</colkititem>
+  <colkititem>T</colkititem>
   <colopportunity>F</colopportunity>
   <colpackingslip>F</colpackingslip>
   <colpickingticket>F</colpickingticket>
   <colprintflag>F</colprintflag>
-  <colpurchase>F</colpurchase>
+  <colpurchase>T</colpurchase>
   <colreturnform>F</colreturnform>
   <colsale>T</colsale>
-  <colstore>F</colstore>
+  <colstore>T</colstore>
   <colstorehidden>F</colstorehidden>
-  <colstorewithgroups>F</colstorewithgroups>
+  <colstorewithgroups>T</colstorewithgroups>
   <coltransferorder>F</coltransferorder>
   <columncustomtransactions></columncustomtransactions>
   <defaultchecked>F</defaultchecked>
@@ -37,7 +37,7 @@
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Quote ID</label>
+  <label>Extend Associated Product</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

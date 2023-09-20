@@ -1,4 +1,4 @@
-<transactioncolumncustomfield scriptid="custcol_ext_quote_id">
+<transactioncolumncustomfield scriptid="custcol_ext_warranty_order">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
   <colbuild>F</colbuild>
@@ -33,11 +33,11 @@
   <displaywidth></displaywidth>
   <dynamicdefault></dynamicdefault>
   <encryptatrest>F</encryptatrest>
-  <fieldtype>TEXTAREA</fieldtype>
+  <fieldtype>CHECKBOX</fieldtype>
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Quote ID</label>
+  <label>Extend Warranty Order</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

@@ -1,0 +1,9 @@
+<mapreducescript scriptid="customscript_ext_refund_contract_mr">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>Extend | MR | Refund Create</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/mapreduce/customscript_ext_refund_contract_mr.js]</scriptfile>
+</mapreducescript>

@@ -22,8 +22,8 @@
   <colstore>F</colstore>
   <colstorehidden>F</colstorehidden>
   <colstorewithgroups>F</colstorewithgroups>
-  <coltime>F</coltime>
   <coltransferorder>F</coltransferorder>
+  <columncustomtransactions></columncustomtransactions>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
   <defaultvalue></defaultvalue>
@@ -37,7 +37,7 @@
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Lead Token</label>
+  <label>Extend Lead Tokens</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

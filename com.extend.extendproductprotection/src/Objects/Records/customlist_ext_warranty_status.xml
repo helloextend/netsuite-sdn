@@ -1,0 +1,34 @@
+<customlist scriptid="customlist_ext_warranty_status">
+  <description></description>
+  <isinactive>F</isinactive>
+  <ismatrixoption>F</ismatrixoption>
+  <isordered>T</isordered>
+  <name>Extend Warranty Status</name>
+  <customvalues>
+    <customvalue scriptid="val_56420_5517624_sb1_154">
+      <abbreviation>N</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Not Synced</value>
+    </customvalue>
+    <customvalue scriptid="val_56421_5517624_sb1_753">
+      <abbreviation>S</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Synced</value>
+    </customvalue>
+    <customvalue scriptid="val_56422_5517624_sb1_246">
+      <abbreviation>W</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Warrantable</value>
+    </customvalue>
+    <customvalue scriptid="val_56423_5517624_sb1_617">
+      <abbreviation>N</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Non-Warrantable</value>
+    </customvalue>
+    <customvalue scriptid="val_56425_5517624_sb1_863">
+      <abbreviation>S</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Sync Error</value>
+    </customvalue>
+  </customvalues>
+</customlist>
