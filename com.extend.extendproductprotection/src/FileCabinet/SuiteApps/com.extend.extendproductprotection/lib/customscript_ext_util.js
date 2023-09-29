@@ -3,7 +3,7 @@
  *@description: Structures the various JSON request bodies to the Extend API
  * @NApiVersion 2.x
  */
-define([
+ define([
     'N/runtime',
     'N/search',
     'N/record',
@@ -90,8 +90,6 @@ define([
             if (intContractsStillActive > 0) {
                 log.debug('refundExtendOrder', "There is/are still " + intContractsStillActive + " active contract(s).");
 
-                var config = EXTEND_CONFIG.getConfig();
-
                 for (var index = 0; index < arrActiveIDs.length; index++) {
                     var contractId = arrActiveIDs[index];
                     var bIsCanceled = checkIfCanceled(contractId, arrCanceledIDs);
@@ -102,7 +100,7 @@ define([
                     } else {
                         log.debug('refundExtendOrder', "Attempting to cancel " + contractId);
                         var objContractToRefund = { 'contractId': contractId }
-                        var objExtendResponse = EXTEND_API.refundContract(objContractToRefund, config);
+                        var objExtendResponse = EXTEND_API.refundContract(objContractToRefund, objExtendConfig);
 
                         if (objExtendResponse.code === 201) {
                             arrCanceledIDs.push(contractId);
