@@ -3,11 +3,12 @@
         <path>~/FileCabinet/SuiteApps/com.extend.extendproductprotection/*</path>
     </files>
     <objects>
-
+              <path>~/Objects/Searches/*</path>
+<!--- 
        <path>~/Objects/Records/*</path>
               <path>~/Objects/Fields/*</path>
-              <path>~/Objects/Searches/*</path>
-              <path>~/Objects/Scripts/*</path>
+             <path>~/Objects/Searches/*</path>
+              <path>~/Objects/Scripts/*</path> -->
     </objects> 
     <translationimports>
         <path>~/Translations/*</path>
