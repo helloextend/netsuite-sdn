@@ -1,4 +1,4 @@
-<transactioncolumncustomfield scriptid="custcol_ext_quote_id">
+<transactioncolumncustomfield scriptid="custcol_ext_plan_item">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
   <colbuild>F</colbuild>
@@ -11,17 +11,17 @@
   <colitemreceipt>F</colitemreceipt>
   <colitemreceiptorder>F</colitemreceiptorder>
   <coljournal>F</coljournal>
-  <colkititem>F</colkititem>
+  <colkititem>T</colkititem>
   <colopportunity>F</colopportunity>
   <colpackingslip>F</colpackingslip>
   <colpickingticket>F</colpickingticket>
   <colprintflag>F</colprintflag>
-  <colpurchase>F</colpurchase>
+  <colpurchase>T</colpurchase>
   <colreturnform>F</colreturnform>
   <colsale>T</colsale>
-  <colstore>F</colstore>
+  <colstore>T</colstore>
   <colstorehidden>F</colstorehidden>
-  <colstorewithgroups>F</colstorewithgroups>
+  <colstorewithgroups>T</colstorewithgroups>
   <coltransferorder>F</coltransferorder>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
@@ -32,19 +32,19 @@
   <displaywidth></displaywidth>
   <dynamicdefault></dynamicdefault>
   <encryptatrest>F</encryptatrest>
-  <fieldtype>TEXTAREA</fieldtype>
+  <fieldtype>SELECT</fieldtype>
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Quote ID</label>
+  <label>Associated Product</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>
   <minvalue></minvalue>
-  <onparentdelete></onparentdelete>
+  <onparentdelete>SET_NULL</onparentdelete>
   <searchlevel>2</searchlevel>
-  <selectrecordtype></selectrecordtype>
-  <showhierarchy>F</showhierarchy>
+  <selectrecordtype>-10</selectrecordtype>
+  <showhierarchy>T</showhierarchy>
   <sourcefilterby></sourcefilterby>
   <sourcefrom></sourcefrom>
   <sourcelist></sourcelist>

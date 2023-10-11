@@ -1,4 +1,4 @@
-<transactionbodycustomfield scriptid="custbody_ext_order_create">
+<transactionbodycustomfield scriptid="custbody_ext_warranty_order">
   <accesslevel>2</accesslevel>
   <applyformatting>F</applyformatting>
   <bodyassemblybuild>F</bodyassemblybuild>
@@ -8,9 +8,9 @@
   <bodydepositapplication>F</bodydepositapplication>
   <bodyexpensereport>F</bodyexpensereport>
   <bodyinventoryadjustment>F</bodyinventoryadjustment>
-  <bodyitemfulfillment>F</bodyitemfulfillment>
+  <bodyitemfulfillment>T</bodyitemfulfillment>
   <bodyitemfulfillmentorder>F</bodyitemfulfillmentorder>
-  <bodyitemreceipt>F</bodyitemreceipt>
+  <bodyitemreceipt>T</bodyitemreceipt>
   <bodyitemreceiptorder>F</bodyitemreceiptorder>
   <bodyjournal>F</bodyjournal>
   <bodyopportunity>F</bodyopportunity>
@@ -41,7 +41,7 @@
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
   <isparent>F</isparent>
-  <label>Extend Order Processed</label>
+  <label>Extend Warranty Order</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>
@@ -58,5 +58,5 @@
   <sourcefrom></sourcefrom>
   <sourcelist></sourcelist>
   <storevalue>T</storevalue>
-  <subtab></subtab>
+  <subtab>TRANSACTIONMAIN</subtab>
 </transactionbodycustomfield>

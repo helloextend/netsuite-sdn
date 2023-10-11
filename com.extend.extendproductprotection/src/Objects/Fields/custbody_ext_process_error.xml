@@ -21,6 +21,7 @@
   <bodyprintstatement>F</bodyprintstatement>
   <bodypurchase>F</bodypurchase>
   <bodysale>T</bodysale>
+  <bodystore>F</bodystore>
   <bodytransferorder>F</bodytransferorder>
   <bodyvendorpayment>F</bodyvendorpayment>
   <checkspelling>F</checkspelling>

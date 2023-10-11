@@ -6,7 +6,7 @@
   <colexpensereport>F</colexpensereport>
   <colgrouponinvoices>F</colgrouponinvoices>
   <colinventoryadjustment>F</colinventoryadjustment>
-  <colitemfulfillment>T</colitemfulfillment>
+  <colitemfulfillment>F</colitemfulfillment>
   <colitemfulfillmentorder>F</colitemfulfillmentorder>
   <colitemreceipt>F</colitemreceipt>
   <colitemreceiptorder>F</colitemreceiptorder>
@@ -22,7 +22,6 @@
   <colstore>F</colstore>
   <colstorehidden>F</colstorehidden>
   <colstorewithgroups>F</colstorewithgroups>
-  <coltime>F</coltime>
   <coltransferorder>F</coltransferorder>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
@@ -37,7 +36,7 @@
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>
-  <label>Extend Lead Token</label>
+  <label>Extend Lead Tokens</label>
   <linktext></linktext>
   <maxlength></maxlength>
   <maxvalue></maxvalue>

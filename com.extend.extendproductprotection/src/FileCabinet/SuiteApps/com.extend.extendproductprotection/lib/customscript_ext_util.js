@@ -3,7 +3,7 @@
  *@description: Structures the various JSON request bodies to the Extend API
  * @NApiVersion 2.x
  */
- define([
+define([
     'N/runtime',
     'N/search',
     'N/record',
@@ -69,7 +69,7 @@
             objSalesOrderRecord.save();
         };
         //refund item by line item transaction id
-        exports.refundExtendOrder = function (objRefundData) {
+        exports.refundExtendOrder = function (objRefundData, objExtendConfig) {
             log.audit('EXTEND UTIL _refundExtendOrder:', '**ENTER**');
             log.audit('EXTEND UTIL _refundExtendOrder: objRefundData', JSON.stringify(objRefundData));
 
@@ -261,7 +261,11 @@
             objExtendData.total_amount = objSalesOrderRecord.getValue({ fieldId: 'total' });
             objExtendData.shipping_total_amount = objSalesOrderRecord.getValue({ fieldId: 'shippingcost' });
             objExtendData.tax_total_amount = objSalesOrderRecord.getValue({ fieldId: 'taxtotal' });
-            objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, '');
+            objExtendData.name = objCustomerInfo.name;
+            if(exports.objectIsEmpty(objCustomerInfo.name)){
+                objExtendData.name = objCustomerInfo.altName;
+            }
+            //objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, ''); //update this
             objExtendData.email = objCustomerInfo.email;
             objExtendData.phone = objCustomerInfo.phone;
             objExtendData.bill_address1 = objBillAddress.address1;
@@ -294,6 +298,12 @@
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
+                //exclude discount
+                var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: i });
+                log.debug('_getExtendData: stItemType ', stItemType + ' | ' + i);
+if(stItemType == 'Discount'){
+    continue;
+}
                 if (!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)) {
                     objExtendItemData[stUniqueKey] = {};
                 }
@@ -478,33 +488,33 @@
         exports.buildExtendShipmentJSON = function (objValues) {
             var shipmentInfo = [];
             for (key in objValues) {
-                var objJSON = {
-                    'lineItemTransactionId': objValues[key].lineItemID,
-                    'productIds': objValues[key].prodcutIds,
-                    'shipmentDate': objValues[key].lineItemID,
-                    'shippingProvider': objValues[key].carrier,
-                    'trackingId': objValues[key].trackingId,
-                    'trackingUrl': objValues[key].trackingUrl,
-                    'destination': {
-                        'address1': objValues[key].dest_address1,
-                        'address2': objValues[key].dest_address2,
-                        'city': objValues[key].dest_city,
-                        'postalCode': objValues[key].dest_zip,
-                        'countryCode': objValues[key].dest_country,
-                        'province': objValues[key].dest_state,
-                    },
-                    'source': {
-                        'address1': objValues[key].source_address1,
-                        'address2': objValues[key].source_address2,
-                        'city': objValues[key].source_city,
-                        'postalCode': objValues[key].source_zip,
-                        'countryCode': objValues[key].source_country,
-                        'province': objValues[key].source_state,
-                    }
+            var objJSON = {
+                'lineItemTransactionId': objValues[key].lineItemID,
+                'productIds': objValues[key].prodcutIds,
+                'shipmentDate': objValues[key].lineItemID,
+                'shippingProvider': objValues[key].carrier,
+                'trackingId': objValues[key].trackingId,
+                'trackingUrl': objValues[key].trackingUrl,
+                'destination': {
+                    'address1': objValues[key].dest_address1,
+                    'address2': objValues[key].dest_address2,
+                    'city': objValues[key].dest_city,
+                    'postalCode': objValues[key].dest_zip,
+                    'countryCode': objValues[key].dest_country,
+                    'province': objValues[key].dest_state,
+                },
+                'source': {
+                    'address1': objValues[key].source_address1,
+                    'address2': objValues[key].source_address2,
+                    'city': objValues[key].source_city,
+                    'postalCode': objValues[key].source_zip,
+                    'countryCode': objValues[key].source_country,
+                    'province': objValues[key].source_state,
                 }
-                shipmentInfo.push(objJSON);
-
             }
+            shipmentInfo.push(objJSON);
+
+        }
             return shipmentInfo;
         };
         /***********************************Support Functions********************************************/
@@ -547,178 +557,178 @@
                     id: stItemId,
                     columns: refIdValue
                 });
-
                 for (var prop in arrItemLookup) {
                     var stItemRefId = arrItemLookup[prop];
                     if (!stItemRefId) {
                         var stItemRefId = arrItemLookup[prop][0].text;
                     }
-
+        
                     var arrItemRefId = stItemRefId.split(": ");
-
+        
                     if (arrItemRefId.length > 1) {
                         stItemRefId = arrItemRefId[1]
-
+        
                     }
                     break;
                 }
+            }
 
+            return stItemRefId;
+        };
+        //get Transaction Date required for contract create
+        exports.getTransactionDate = function (stDate) {
+            var stTimeDate = new Date(stDate);
+            return stTimeDate.getTime() / 1000;
+        };
+        //get Current Date in epoch format required for contract create
+        exports.getepochDate = function () {
+            var stTimeDate = new Date();
+            return stTimeDate.getTime();
+        };
+        //get Customer Info required for contract create
+        exports.getCustomerInfo = function (stCustomerId) {
+            var objCustomerRecord = record.load({
+                type: 'customer',
+                id: stCustomerId
+            });
+            var objCustomerInfo = {
+                "altName" : objCustomerRecord.getValue({ fieldId: 'altname' }),
+                "name": objCustomerRecord.getValue({ fieldId: 'firstname' }) + ' ' + objCustomerRecord.getValue({ fieldId: 'lastname' }),
+                "email": objCustomerRecord.getValue({ fieldId: 'email' }),
+                "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
+                "bill_address1": objCustomerRecord.getValue({ fieldId: 'billaddr1' }),
+                "bill_address2": objCustomerRecord.getValue({ fieldId: 'billaddr2' }),
+                "bill_city": objCustomerRecord.getValue({ fieldId: 'billcity' }),
+                "bill_state": objCustomerRecord.getValue({ fieldId: 'billstate' }),
+                "bill_zip": objCustomerRecord.getValue({ fieldId: 'billzip' }),
+                "bill_country": "US",
+                "ship_address1": objCustomerRecord.getValue({ fieldId: 'shipaddr1' }),
+                "ship_address2": objCustomerRecord.getValue({ fieldId: 'shipaddr2' }),
+                "ship_city": objCustomerRecord.getValue({ fieldId: 'shipcity' }),
+                "ship_state": objCustomerRecord.getValue({ fieldId: 'shipstate' }),
+                "ship_zip": objCustomerRecord.getValue({ fieldId: 'shipzip' }),
+                "ship_country": "US",
+            }
+            log.debug('objCustomerInfo', objCustomerInfo)
+            return objCustomerInfo;
+        };
+        //get Item Purchase Price
+        exports.getPurchasePrice = function (stItemId) {
+            var arrFilters = [];
+            arrFilters.push(search.createFilter({ name: 'internalid', operator: 'is', values: [stItemId] }));
+            var arrColumns = [];
+            arrColumns.push(search.createColumn({ name: 'baseprice' }));
 
-        }
-
-        return stItemRefId;
-    };
-//get Transaction Date required for contract create
-exports.getTransactionDate = function (stDate) {
-    var stTimeDate = new Date(stDate);
-    return stTimeDate.getTime() / 1000;
-};
-//get Current Date in epoch format required for contract create
-exports.getepochDate = function () {
-    var stTimeDate = new Date();
-    return stTimeDate.getTime();
-};
-//get Customer Info required for contract create
-exports.getCustomerInfo = function (stCustomerId) {
-    var objCustomerRecord = record.load({
-        type: 'customer',
-        id: stCustomerId
-    });
-    var objCustomerInfo = {
-        "email": objCustomerRecord.getValue({ fieldId: 'email' }),
-        "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
-        "bill_address1": objCustomerRecord.getValue({ fieldId: 'billaddr1' }),
-        "bill_address2": objCustomerRecord.getValue({ fieldId: 'billaddr2' }),
-        "bill_city": objCustomerRecord.getValue({ fieldId: 'billcity' }),
-        "bill_state": objCustomerRecord.getValue({ fieldId: 'billstate' }),
-        "bill_zip": objCustomerRecord.getValue({ fieldId: 'billzip' }),
-        "bill_country": "US",
-        "ship_address1": objCustomerRecord.getValue({ fieldId: 'shipaddr1' }),
-        "ship_address2": objCustomerRecord.getValue({ fieldId: 'shipaddr2' }),
-        "ship_city": objCustomerRecord.getValue({ fieldId: 'shipcity' }),
-        "ship_state": objCustomerRecord.getValue({ fieldId: 'shipstate' }),
-        "ship_zip": objCustomerRecord.getValue({ fieldId: 'shipzip' }),
-        "ship_country": "US",
-    }
-    return objCustomerInfo;
-};
-//get Item Purchase Price
-exports.getPurchasePrice = function (stItemId) {
-    var arrFilters = [];
-    arrFilters.push(search.createFilter({ name: 'internalid', operator: 'is', values: [stItemId] }));
-    var arrColumns = [];
-    arrColumns.push(search.createColumn({ name: 'baseprice' }));
-
-    var arrSearchResults = exports.search('item', null, arrFilters, arrColumns);
-    var stPurchasePrice;
-    if (arrSearchResults.length) {
-        stPurchasePrice = arrSearchResults[0].getValue({ name: 'baseprice' });
-    }
-    return stPurchasePrice;
-};
-/***********************************Support Functions********************************************/
-/**
- * Performs empty validations
- */
-exports.objectIsEmpty = function (obj) {
-    for (var prop in obj) {
-        if (obj.hasOwnProperty(prop))
+            var arrSearchResults = exports.search('item', null, arrFilters, arrColumns);
+            var stPurchasePrice;
+            if (arrSearchResults.length) {
+                stPurchasePrice = arrSearchResults[0].getValue({ name: 'baseprice' });
+            }
+            return stPurchasePrice;
+        };
+        /***********************************Support Functions********************************************/
+        /**
+         * Performs empty validations
+         */
+        exports.objectIsEmpty = function (obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop))
+                    return false;
+            }
+            return true;
+        };
+        exports.stringIsEmpty = function (stValue) {
+            if ((stValue == '') || (stValue == null) || (stValue == undefined)) {
+                return true;
+            }
             return false;
-    }
-    return true;
-};
-exports.stringIsEmpty = function (stValue) {
-    if ((stValue == '') || (stValue == null) || (stValue == undefined)) {
-        return true;
-    }
-    return false;
-};
-/**
- * Createa Custom Error Object
- */
-exports.createError = function (objErrorDetails) {
-    var objCustomError = error.create({
-        name: objErrorDetails.title,
-        message: objErrorDetails.message,
-        notifyOff: true
-    });
-    return objCustomError;
-};
-/**
- * Performs search with no size limitations
- */
-exports.search = function (stRecordType, stSearchId, arrSearchFilter, arrSearchColumn, bUseFilterExpressions, arrSearchSetting) {
-    if (!stRecordType && !stSearchId) {
-        throw 'search: Missing a required argument. Either stRecordType or stSearchId should be provided.';
-    }
+        };
+        /**
+         * Createa Custom Error Object
+         */
+        exports.createError = function (objErrorDetails) {
+            var objCustomError = error.create({
+                name: objErrorDetails.title,
+                message: objErrorDetails.message,
+                notifyOff: true
+            });
+            return objCustomError;
+        };
+        /**
+         * Performs search with no size limitations
+         */
+        exports.search = function (stRecordType, stSearchId, arrSearchFilter, arrSearchColumn, bUseFilterExpressions, arrSearchSetting) {
+            if (!stRecordType && !stSearchId) {
+                throw 'search: Missing a required argument. Either stRecordType or stSearchId should be provided.';
+            }
 
-    var arrReturnSearchResults = [];
-    var objSavedSearch;
-    var intMaxResults = 1000;
-    if (stSearchId) {
-        objSavedSearch = search.load({
-            id: stSearchId
-        });
-    }
-    else {
-        objSavedSearch = search.create({
-            type: stRecordType
-        });
-    }
-
-    // add search filter if one is passed
-    if (arrSearchFilter) {
-        //Use Filter Expressions if that option has been enabled
-        if (bUseFilterExpressions) {
+            var arrReturnSearchResults = [];
+            var objSavedSearch;
+            var intMaxResults = 1000;
             if (stSearchId) {
-                objSavedSearch.filterExpression = objSavedSearch.filters.concat(arrSearchFilter);
+                objSavedSearch = search.load({
+                    id: stSearchId
+                });
             }
             else {
-                objSavedSearch.filterExpression = arrSearchFilter;
+                objSavedSearch = search.create({
+                    type: stRecordType
+                });
             }
-        }
-        else {
-            if (stSearchId) {
-                objSavedSearch.filters = objSavedSearch.filters.concat(arrSearchFilter);
-            }
-            else {
-                objSavedSearch.filters = arrSearchFilter;
-            }
-        }
-    }
-    // add search column if one is passed
-    if (arrSearchColumn) {
-        if (stSearchId) {
-            objSavedSearch.columns = objSavedSearch.columns.concat(arrSearchColumn);
-        }
-        else {
-            objSavedSearch.columns = arrSearchColumn;
-        }
-    }
-    // add search settings if one is passed
-    if (arrSearchSetting && arrSearchSetting.length > 0) {
-        if (stSearchId) {
-            objSavedSearch.settings = objSavedSearch.columns.concat(arrSearchSetting);
-        }
-        else {
-            objSavedSearch.settings = arrSearchSetting;
-        }
-    }
 
-    var objResultSet = objSavedSearch.run();
-    var intSearchIndex = 0;
-    var arrResultSlice = null;
-    do {
-        arrResultSlice = objResultSet.getRange(intSearchIndex, intSearchIndex + intMaxResults);
-        if (arrResultSlice == null) {
-            break;
-        }
-        arrReturnSearchResults = arrReturnSearchResults.concat(arrResultSlice);
-        intSearchIndex = arrReturnSearchResults.length;
-    }
-    while (arrResultSlice.length >= intMaxResults);
+            // add search filter if one is passed
+            if (arrSearchFilter) {
+                //Use Filter Expressions if that option has been enabled
+                if (bUseFilterExpressions) {
+                    if (stSearchId) {
+                        objSavedSearch.filterExpression = objSavedSearch.filters.concat(arrSearchFilter);
+                    }
+                    else {
+                        objSavedSearch.filterExpression = arrSearchFilter;
+                    }
+                }
+                else {
+                    if (stSearchId) {
+                        objSavedSearch.filters = objSavedSearch.filters.concat(arrSearchFilter);
+                    }
+                    else {
+                        objSavedSearch.filters = arrSearchFilter;
+                    }
+                }
+            }
+            // add search column if one is passed
+            if (arrSearchColumn) {
+                if (stSearchId) {
+                    objSavedSearch.columns = objSavedSearch.columns.concat(arrSearchColumn);
+                }
+                else {
+                    objSavedSearch.columns = arrSearchColumn;
+                }
+            }
+            // add search settings if one is passed
+            if (arrSearchSetting && arrSearchSetting.length > 0) {
+                if (stSearchId) {
+                    objSavedSearch.settings = objSavedSearch.columns.concat(arrSearchSetting);
+                }
+                else {
+                    objSavedSearch.settings = arrSearchSetting;
+                }
+            }
 
-    return arrReturnSearchResults;
-};
-return exports;
+            var objResultSet = objSavedSearch.run();
+            var intSearchIndex = 0;
+            var arrResultSlice = null;
+            do {
+                arrResultSlice = objResultSet.getRange(intSearchIndex, intSearchIndex + intMaxResults);
+                if (arrResultSlice == null) {
+                    break;
+                }
+                arrReturnSearchResults = arrReturnSearchResults.concat(arrResultSlice);
+                intSearchIndex = arrReturnSearchResults.length;
+            }
+            while (arrResultSlice.length >= intMaxResults);
+
+            return arrReturnSearchResults;
+        };
+        return exports;
     });

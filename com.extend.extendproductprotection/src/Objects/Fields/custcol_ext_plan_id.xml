@@ -22,18 +22,17 @@
   <colstore>F</colstore>
   <colstorehidden>F</colstorehidden>
   <colstorewithgroups>F</colstorewithgroups>
-  <coltime>F</coltime>
   <coltransferorder>F</coltransferorder>
   <defaultchecked>F</defaultchecked>
   <defaultselection></defaultselection>
   <defaultvalue></defaultvalue>
   <description></description>
   <displayheight></displayheight>
-  <displaytype>NORMAL</displaytype>
+  <displaytype>LOCKED</displaytype>
   <displaywidth></displaywidth>
   <dynamicdefault></dynamicdefault>
   <encryptatrest>F</encryptatrest>
-  <fieldtype>TEXT</fieldtype>
+  <fieldtype>TEXTAREA</fieldtype>
   <help></help>
   <isformula>F</isformula>
   <ismandatory>F</ismandatory>

@@ -5,8 +5,35 @@
   <notifyadmins>F</notifyadmins>
   <notifyemails></notifyemails>
   <notifyowner>T</notifyowner>
-  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/mapreduce/customscript_ext_upsert_order.js]</scriptfile>
+  <scriptfile>[/SuiteScripts/extend-sdk/mapreduce/customscript_ext_upsert_order.js]</scriptfile>
   <scriptcustomfields>
+    <scriptcustomfield scriptid="custscript_ext_config_rec">
+      <accesslevel>2</accesslevel>
+      <applyformatting>F</applyformatting>
+      <checkspelling>F</checkspelling>
+      <defaultchecked>F</defaultchecked>
+      <defaultselection></defaultselection>
+      <defaultvalue></defaultvalue>
+      <description></description>
+      <displayheight></displayheight>
+      <displaytype>NORMAL</displaytype>
+      <displaywidth></displaywidth>
+      <dynamicdefault></dynamicdefault>
+      <fieldtype>SELECT</fieldtype>
+      <help></help>
+      <isformula>F</isformula>
+      <ismandatory>F</ismandatory>
+      <label>Extend Configuration Record</label>
+      <linktext></linktext>
+      <maxlength></maxlength>
+      <maxvalue></maxvalue>
+      <minvalue></minvalue>
+      <onparentdelete>NO_ACTION</onparentdelete>
+      <searchlevel>2</searchlevel>
+      <selectrecordtype>[scriptid=customrecord_ext_configuration]</selectrecordtype>
+      <setting></setting>
+      <storevalue>T</storevalue>
+    </scriptcustomfield>
     <scriptcustomfield scriptid="custscript_ext_order_search">
       <accesslevel>2</accesslevel>
       <applyformatting>F</applyformatting>
@@ -34,40 +61,13 @@
       <setting></setting>
       <storevalue>T</storevalue>
     </scriptcustomfield>
-    <scriptcustomfield scriptid="custscript_ext_config_rec">
-      <accesslevel>2</accesslevel>
-      <applyformatting>F</applyformatting>
-      <checkspelling>F</checkspelling>
-      <defaultchecked>F</defaultchecked>
-      <defaultselection></defaultselection>
-      <defaultvalue></defaultvalue>
-      <description></description>
-      <displayheight></displayheight>
-      <displaytype>NORMAL</displaytype>
-      <displaywidth></displaywidth>
-      <dynamicdefault></dynamicdefault>
-      <fieldtype>SELECT</fieldtype>
-      <help></help>
-      <isformula>F</isformula>
-      <ismandatory>F</ismandatory>
-      <label>Extend Configuration Record</label>
-      <linktext></linktext>
-      <maxlength></maxlength>
-      <maxvalue></maxvalue>
-      <minvalue></minvalue>
-      <onparentdelete>NO_ACTION</onparentdelete>
-      <searchlevel>2</searchlevel>
-      <selectrecordtype>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration]</selectrecordtype>
-      <setting></setting>
-      <storevalue>T</storevalue>
-    </scriptcustomfield>
   </scriptcustomfields>
   <scriptdeployments>
     <scriptdeployment scriptid="customdeploy_ext_upsert_order_mr_demand">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec></custscript_ext_config_rec>
-      <custscript_ext_order_search></custscript_ext_order_search>
+      <custscript_ext_config_rec>[scriptid=customrecord_ext_configuration.val_36580140_4141196_878]</custscript_ext_config_rec>
+      <custscript_ext_order_search>[scriptid=customsearch_ext_order_search_demand]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
       <queueallstagesatonce>T</queueallstagesatonce>
@@ -78,15 +78,15 @@
       <recurrence>
         <single>
           <repeat></repeat>
-          <startdate>2023-05-04</startdate>
-          <starttime>01:00:00Z</starttime>
+          <startdate>2023-09-29</startdate>
+          <starttime>22:00:00Z</starttime>
         </single>
       </recurrence>
     </scriptdeployment>
     <scriptdeployment scriptid="customdeploy_ext_upsert_order_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration.val_400150_t2522354_422]</custscript_ext_config_rec>
+      <custscript_ext_config_rec>[scriptid=customrecord_ext_configuration.val_36580140_4141196_878]</custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_search]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
@@ -98,8 +98,8 @@
       <recurrence>
         <single>
           <repeat></repeat>
-          <startdate>2023-05-04</startdate>
-          <starttime>01:00:00Z</starttime>
+          <startdate>2023-09-29</startdate>
+          <starttime>22:00:00Z</starttime>
         </single>
       </recurrence>
     </scriptdeployment>
