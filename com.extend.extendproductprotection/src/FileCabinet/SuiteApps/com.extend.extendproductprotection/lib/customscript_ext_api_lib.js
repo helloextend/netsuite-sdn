@@ -167,7 +167,7 @@
       //var config = extendConfig.getConfig();
       try {
         var response = https.get({
-          url: config.domain + '/leads/' + config.storeId + '/offers',
+          url: config.domain + '/leads/' + objLeadDetails + '/offers',
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',

@@ -13,14 +13,14 @@
  *@NScriptType Suitelet
  *@NModuleScope Public
  */
- define([
+define([
     'N/ui/serverWidget',
     'N/runtime',
     'N/http',
     'N/error',
     'N/log',
     '../lib/customscript_ext_api_lib',
-       '../lib/customscript_ext_config_lib'
+    '../lib/customscript_ext_config_lib'
 
 ],
     function (ui, runtime, http, error, log, EXTEND_API, EXTEND_CONFIG) {
@@ -56,10 +56,10 @@
                 var objExtendItem = {};
 
                 var stPlanCount = objRequest.getLineCount({ group: 'custpage_plans' });
-               // objExtendItem.stWarrantyItemId = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
-              //var extendConfigRec = 
-objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
-;
+                // objExtendItem.stWarrantyItemId = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+                //var extendConfigRec = 
+                objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
+                ;
 
                 //Line Number
                 // var stProductLine = objRequest.parameters.custpage_line_num;
@@ -69,6 +69,7 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
                 objExtendItem.stItemName = objRequest.parameters.custpage_item_name.trim();
                 objExtendItem.stItemQty = objRequest.parameters.custpage_item_qty;
                 objExtendItem.stRefId = objRequest.parameters.custpage_item_ref_id;
+                objExtendItem.stLeadToken = objRequest.parameters.custpage_lead_input;
                 objExtendItem.stPlanId = '';
                 objExtendItem.stPrice = 0;
                 objExtendItem.stDescription = '';
@@ -114,6 +115,7 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_associated_item', " + objExtendItem.stItemId + ", true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_plan_id', '" + objExtendItem.stPlanId + "', true, true);";
                 html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_plan_term', '" + objExtendItem.stTerm + "', true, true);";
+                html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_lead_token', '" + objExtendItem.stLeadToken + "', true, true);"; //TODO
                 html += " window.opener.nlapiCommitLineItem('item');";
                 /**
                  * IMPORTANT
@@ -162,7 +164,10 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
                 arrItemList = JSON.parse(context.request.parameters.arrItemid);
                 var stItemInternalId = context.request.parameters.itemid;
                 var stItemRefId = context.request.parameters.refid;
+                var stLeadToken = context.request.parameters.leadToken;
                 log.debug('stItemRefId', stItemRefId);
+                log.debug('stLeadToken', stLeadToken);
+
 
                 // Create the form
                 var objForm = ui.createForm({
@@ -292,12 +297,16 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
                 if (stItemInternalId) {
                     objItemSelectField.defaultValue = stItemInternalId;
                 }
-                              var objLeadTokenInputField = objForm.addField({
+                var objLeadTokenInputField = objForm.addField({
                     id: 'custpage_lead_input',
                     type: ui.FieldType.TEXT,
                     label: 'Input Lead Token',
                     container: 'custpage_item'
                 });
+                if (stLeadToken) {
+                    objLeadTokenInputField.defaultValue = stLeadToken;
+                }
+
                 /**
                  * BUILD SUBLIST 
                  */
@@ -345,13 +354,24 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
                 objForm.addSubmitButton('Submit');
                 /**
                  * POPULATE SUBLIST 
-                 */
-                if (stItemRefId) {
+                 */                    
+
+                
+                if (stItemRefId || stLeadToken) {
                     try {
-                      var config = EXTEND_CONFIG.getConfig(1);
+                    if(stLeadToken){
+
+                        var config = EXTEND_CONFIG.getConfig(1);
+    
+                            var objResponse = EXTEND_API.getLeadOffers(stLeadToken, config);
+                            log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
+                    }else{
+                        var config = EXTEND_CONFIG.getConfig(1);
 
                         var objResponse = EXTEND_API.getOffers(stItemRefId, config);
                         log.debug('OFFER MODAL SUITELET: Offers JSON Response', objResponse);
+                    }
+                        
 
                         if (objResponse.code == 200) {
                             var objResponseBody = JSON.parse(objResponse.body);
@@ -359,9 +379,9 @@ objExtendItem.stWarrantyItemId = EXTEND_CONFIG.getConfig(1).product_plan_item;
 
                             var arrPlans = objResponseBody.plans.adh;
                             log.debug('OFFER MODAL SUITELET: arrPlans', arrPlans);
-                          if(!arrPlans){
-                            var arrPlans = objResponseBody.plans.base;
-                          }
+                            if (!arrPlans) {
+                                var arrPlans = objResponseBody.plans.base;
+                            }
 
                             //Populate Sublist Values
                             for (var i = 0; i < arrPlans.length; i++) {
