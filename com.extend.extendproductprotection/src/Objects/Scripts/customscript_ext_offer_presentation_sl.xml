@@ -6,14 +6,14 @@
   <notifyemails></notifyemails>
   <notifyowner>T</notifyowner>
   <notifyuser>F</notifyuser>
-  <scriptfile>[/SuiteScripts/extend-sdk/suitelet/customscript_ext_offer_modal_sl.js]</scriptfile>
+  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/suitelet/customscript_ext_offer_modal_sl.js]</scriptfile>
   <scriptcustomfields>
     <scriptcustomfield scriptid="custscript_ext_environment">
       <accesslevel>2</accesslevel>
       <applyformatting>F</applyformatting>
       <checkspelling>F</checkspelling>
       <defaultchecked>F</defaultchecked>
-      <defaultselection>[scriptid=customlist_ext_environment.val_56270_5517624_sb1_889]</defaultselection>
+      <defaultselection></defaultselection>
       <defaultvalue></defaultvalue>
       <description></description>
       <displayheight></displayheight>
@@ -96,9 +96,9 @@
       <allpartners>F</allpartners>
       <allroles>T</allroles>
       <audslctrole></audslctrole>
-      <custscript_ext_configuration>[scriptid=customrecord_ext_configuration.val_36580140_4141196_878]</custscript_ext_configuration>
-      <custscript_ext_environment>[scriptid=customlist_ext_environment.val_56271_5517624_sb1_986]</custscript_ext_environment>
-      <custscript_ext_protection_plan>[ACCOUNT_SPECIFIC_VALUE]</custscript_ext_protection_plan>
+      <custscript_ext_configuration></custscript_ext_configuration>
+      <custscript_ext_environment></custscript_ext_environment>
+      <custscript_ext_protection_plan></custscript_ext_protection_plan>
       <eventtype></eventtype>
       <isdeployed>T</isdeployed>
       <isonline>F</isonline>

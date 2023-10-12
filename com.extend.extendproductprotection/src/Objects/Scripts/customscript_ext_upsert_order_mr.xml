@@ -5,7 +5,7 @@
   <notifyadmins>F</notifyadmins>
   <notifyemails></notifyemails>
   <notifyowner>T</notifyowner>
-  <scriptfile>[/SuiteScripts/extend-sdk/mapreduce/customscript_ext_upsert_order.js]</scriptfile>
+  <scriptfile>[/SuiteApps/com.extend.extendproductprotection/mapreduce/customscript_ext_upsert_order.js]</scriptfile>
   <scriptcustomfields>
     <scriptcustomfield scriptid="custscript_ext_config_rec">
       <accesslevel>2</accesslevel>
@@ -66,7 +66,7 @@
     <scriptdeployment scriptid="customdeploy_ext_upsert_order_mr_demand">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[scriptid=customrecord_ext_configuration.val_36580140_4141196_878]</custscript_ext_config_rec>
+      <custscript_ext_config_rec></custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_search_demand]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
@@ -86,7 +86,7 @@
     <scriptdeployment scriptid="customdeploy_ext_upsert_order_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[scriptid=customrecord_ext_configuration.val_36580140_4141196_878]</custscript_ext_config_rec>
+      <custscript_ext_config_rec></custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_search]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>

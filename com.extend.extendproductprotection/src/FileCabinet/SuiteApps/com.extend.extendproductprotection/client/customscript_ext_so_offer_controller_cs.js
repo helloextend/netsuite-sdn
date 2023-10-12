@@ -27,7 +27,6 @@ define([
         };
         exports.validateLine = function (context) {
             console.log('Validating Line', context);
-console.log('Validating Line', context)
             var objEventRouter = {
                 'item': _handleItemInput
             }
@@ -45,10 +44,10 @@ console.log('Validating Line', context)
         function _handleItemInput(context) {
 
             console.log('Handling Input', context);
-           // console.log('Sublist', context.currentRecord.getCurrentSublistValue({ sublistId: context.sublistId }));
+            // console.log('Sublist', context.currentRecord.getCurrentSublistValue({ sublistId: context.sublistId }));
             console.log('config', 'getting.....');
-          var config = EXTEND_CONFIG.getConfig(1);
-                      console.log('config', config);
+            var config = EXTEND_CONFIG.getConfig(1);
+            console.log('config', config);
 
             var refIdValue = config.refId;
 
@@ -61,11 +60,25 @@ console.log('Validating Line', context)
                 sublistId: context.sublistId,
                 fieldId: 'item'
             });
-			console.log('stExtendItem', stExtendItem);
-			
-			console.log('stItemId', stItemId);
+            console.log('stExtendItem', stExtendItem);
+
+            console.log('stItemId', stItemId);
             if (stExtendItem == stItemId) {
                 return;
+            }
+
+            // Lookup to item to see if it is eligible for warranty offers
+            var arrItemLookupField = search.lookupFields({
+                type: 'item',
+                id: stItemId,
+                columns: 'custitem_ext_is_warrantable'
+            });
+            var bIsWarranty = arrItemLookupField.custitem_ext_is_warrantable;
+
+            log.debug('Is warranty', typeof (bIsWarranty) + ', ' + bIsWarranty);
+            // If item is not a warranty item, return
+            if (!bIsWarranty) {
+                return true;
             }
 
             var stItemRefId = stItemId;
@@ -87,21 +100,21 @@ console.log('Validating Line', context)
                     id: stItemId,
                     columns: refIdValue
                 });
-              console.log('arrItemLookup', arrItemLookup)
+                console.log('arrItemLookup', arrItemLookup)
                 for (var prop in arrItemLookup) {
                     var stItemRefId = arrItemLookup[prop];
-                  if(!stItemRefId){
-                    var stItemRefId = arrItemLookup[prop][0].text;
-                  }
-                                      var arrItemRefId = stItemRefId.split(": ");
-                                console.log('arrItemRefId', arrItemRefId)
+                    if (!stItemRefId) {
+                        var stItemRefId = arrItemLookup[prop][0].text;
+                    }
+                    var arrItemRefId = stItemRefId.split(": ");
+                    console.log('arrItemRefId', arrItemRefId)
 
-                  if(arrItemRefId.length > 1){
-                    stItemRefId = arrItemRefId[1]
-                                                    console.log('stItemRefId', stItemRefId)
+                    if (arrItemRefId.length > 1) {
+                        stItemRefId = arrItemRefId[1]
+                        console.log('stItemRefId', stItemRefId)
 
-                  }
-                                console.log('stItemRefId', stItemRefId)
+                    }
+                    console.log('stItemRefId', stItemRefId)
 
                     break;
                 }
@@ -136,14 +149,14 @@ console.log('Validating Line', context)
                 sublistId: stSublistId
             });
             console.log('linecount', linecount);
-           console.log('config', 'getting.....');
-          var config = EXTEND_CONFIG.getConfig(1);
-                      console.log('config', config);
+            console.log('config', 'getting.....');
+            var config = EXTEND_CONFIG.getConfig(1);
+            console.log('config', config);
 
             var refIdValue = config.refId;
-          var stExtendItem = config.product_plan_item;
+            var stExtendItem = config.product_plan_item;
             //get extend item
-           // var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
+            // var stExtendItem = runtime.getCurrentScript().getParameter({ name: 'custscript_ext_protection_plan' });
 
             //loop item sublist or retrieve for single line item if validate line function
             for (var i = 0; i < linecount; i++) {
@@ -164,6 +177,15 @@ console.log('Validating Line', context)
                     fieldId: 'quantity',
                     line: i
                 });
+            // Lookup to item to see if it is eligible for warranty offers
+            var arrItemLookupField = search.lookupFields({
+                type: 'item',
+                id: stItemId,
+                columns: 'custitem_ext_is_warrantable'
+            });
+            var bIsWarranty = arrItemLookupField.custitem_ext_is_warrantable;
+        
+            log.debug('Is warranty', typeof(bIsWarranty) + ', ' + bIsWarranty);
                 if (refIdValue) {
                     // Lookup to item to see if it is eligible for warranty offers
                     var arrItemLookup = search.lookupFields({
@@ -171,25 +193,25 @@ console.log('Validating Line', context)
                         id: stItemId,
                         columns: refIdValue
                     });
-              console.log('arrItemLookup', arrItemLookup)
-                for (var prop in arrItemLookup) {
-                    var stItemRefId = arrItemLookup[prop];
-                  if(!stItemRefId){
-                    var stItemRefId = arrItemLookup[prop][0].text;
-                  }
+                    console.log('arrItemLookup', arrItemLookup)
+                    for (var prop in arrItemLookup) {
+                        var stItemRefId = arrItemLookup[prop];
+                        if (!stItemRefId) {
+                            var stItemRefId = arrItemLookup[prop][0].text;
+                        }
 
-                    var arrItemRefId = stItemRefId.split(": ");
-                                console.log('arrItemRefId', arrItemRefId)
+                        var arrItemRefId = stItemRefId.split(": ");
+                        console.log('arrItemRefId', arrItemRefId)
 
-                  if(arrItemRefId.length > 1){
-                    stItemRefId = arrItemRefId[1]
-                                                    console.log('stItemRefId', stItemRefId)
+                        if (arrItemRefId.length > 1) {
+                            stItemRefId = arrItemRefId[1]
+                            console.log('stItemRefId', stItemRefId)
 
-                  }
-                                console.log('stItemRefId', stItemRefId)
+                        }
+                        console.log('stItemRefId', stItemRefId)
 
-                    break;
-                }
+                        break;
+                    }
                 }
 
                 var objItem = {};
@@ -200,7 +222,8 @@ console.log('Validating Line', context)
                 objItem.refId = stItemRefId;
                 //console.log('objItem', objItem);
                 //push to array
-                if (stExtendItem != stItemId) {
+                            // If item is not a warranty item, return
+                if (stExtendItem != stItemId || !bIsWarranty) {
                     arrItemList.push(objItem);
                 }
             }
