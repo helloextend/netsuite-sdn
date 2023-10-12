@@ -39,7 +39,7 @@
     <scriptdeployment scriptid="customdeploy_ext_refund_create_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_refund_search>[scriptid=customsearch_ext_order_refund]</custscript_ext_refund_search>
+      <custscript_ext_refund_search></custscript_ext_refund_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
       <queueallstagesatonce>T</queueallstagesatonce>
