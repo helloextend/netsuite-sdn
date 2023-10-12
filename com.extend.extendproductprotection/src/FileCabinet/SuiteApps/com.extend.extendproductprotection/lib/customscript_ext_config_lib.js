@@ -12,9 +12,9 @@ define([
             SANDBOX: 1,
             PRODUCTION: 2
         }
-        exports.getConfig = function () {
+        exports.getConfig = function (stExtendConfigRecId) {
             //Get storeId & APIkey from config custom record
-
+//console.log('test');
             var STORE_ID;
             var API_KEY;
             var API_VERSION = 'latest';
@@ -26,8 +26,8 @@ define([
             var DOMAIN = 'https://api-demo.helloextend.com';
 
 
-            var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
-            log.debug('_getConfig: stExtendConfigRecId ', stExtendConfigRecId);
+            //var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_rec');
+            //log.debug('_getConfig: stExtendConfigRecId ', stExtendConfigRecId);
 
             var arrFilters = ["internalId", "is", stExtendConfigRecId];
 
@@ -52,7 +52,7 @@ define([
             var searchResultCount = customrecord_ext_configurationSearchObj.runPaged().count;
             customrecord_ext_configurationSearchObj.run().each(function (result) {
                 ENVIRONMENT = result.getValue({ name: 'custrecord_ext_environment' });
-                log.debug('_getConfig: ENVIRONMENT ', ENVIRONMENT);
+                //log.debug('_getConfig: ENVIRONMENT ', ENVIRONMENT);
 
                 switch (Number(ENVIRONMENT)) {
                     case objExtendEnvironment.SANDBOX:
@@ -64,7 +64,7 @@ define([
                     default:
                         DOMAIN = 'https://api-demo.helloextend.com'
                 };
-                log.debug('_getConfig: DOMAIN ', DOMAIN);
+               // log.debug('_getConfig: DOMAIN ', DOMAIN);
                 STORE_ID = result.getValue({ name: 'custrecord_ext_store_id' });
                 API_KEY = result.getValue({ name: 'custrecord_ext_api_key' });
                 EMAIL = result.getValue({ name: 'custrecord_ext_demo_email' });

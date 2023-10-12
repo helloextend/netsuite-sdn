@@ -301,9 +301,9 @@ define([
                 //exclude discount
                 var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: i });
                 log.debug('_getExtendData: stItemType ', stItemType + ' | ' + i);
-if(stItemType == 'Discount'){
-    continue;
-}
+                if(stItemType == 'Discount'){
+                    continue;
+                }
                 if (!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)) {
                     objExtendItemData[stUniqueKey] = {};
                 }
