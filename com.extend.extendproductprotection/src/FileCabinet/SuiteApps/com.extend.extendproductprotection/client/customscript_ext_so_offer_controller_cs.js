@@ -181,7 +181,7 @@ define([
             var arrItemLookupField = search.lookupFields({
                 type: 'item',
                 id: stItemId,
-                columns: 'custitem_ext_is_warrantable'
+                columns: 'custitem_product_protection_item'
             });
             var bIsWarranty = arrItemLookupField.custitem_ext_is_warrantable;
         
