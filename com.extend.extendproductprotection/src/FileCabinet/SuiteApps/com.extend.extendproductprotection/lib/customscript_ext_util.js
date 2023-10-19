@@ -262,7 +262,7 @@
             var objShipAddress = exports.getAddress(objSalesOrderRecord, 'shippingaddress');
             var objBillAddress = exports.getAddress(objSalesOrderRecord, 'billingaddress');
             //Build SO Info Object
-            objExtendData.id = objSalesOrderRecord.id + objSalesOrderRecord.getValue({ fieldId: 'tranid' });
+            objExtendData.id = objSalesOrderRecord.id + "-" + objSalesOrderRecord.getValue({ fieldId: 'tranid' });
             objExtendData.tran_date = exports.getepochDate();
             objExtendData.currency = 'USD';
             objExtendData.order_number = objSalesOrderRecord.getValue({ fieldId: 'tranid' });
@@ -346,7 +346,7 @@
                     //
                     else {
                         //get related item from extend line
-                        var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });
+                        var stExtendItemRefId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_item', line: i });
                         log.debug('_getExtendData: stRelatedItem| stExtendItemRefId ', stExtendItemRefId);
 
                         for (var j = 0; j < stLineCount; j++) {
@@ -362,7 +362,7 @@
                                 objExtendItemData[stUniqueKey].plan_quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
                                 objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
                                 log.debug('_getExtendData: i| objExtendItemData[stUniqueKey].extend_plan_id  ', i + ' | ' + objExtendItemData[stUniqueKey].extend_plan_id );
-                                objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
+                                objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_item', line: i });;
                                 objExtendItemData[stUniqueKey].extend_line = "" + i;
                                 objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
                                 if(!objExtendItemData[stUniqueKey].plan_price){

@@ -115,7 +115,7 @@
       html += " window.opener.nlapiSetCurrentLineItemValue('item', 'rate'," + objExtendItem.stPrice + ", true, true);";
       html += " window.opener.nlapiSetCurrentLineItemValue('item', 'quantity'," + objExtendItem.stItemQty + ", true, true);";
       html += " window.opener.nlapiSetCurrentLineItemValue('item', 'description', '" + objExtendItem.stDescription + "', true, true);";
-      html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_associated_item', " + objExtendItem.stItemId + ", true, true);";
+      html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_plan_item', " + objExtendItem.stItemId + ", true, true);";
       html += " window.opener.nlapiSetCurrentLineItemValue('item', 'custcol_ext_plan_id', '" + objExtendItem.stPlanId + "', true, true);";
       html += " window.opener.nlapiCommitLineItem('item');";
       /**
