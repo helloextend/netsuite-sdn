@@ -3,9 +3,12 @@
         <path>~/FileCabinet/SuiteApps/com.extend.extendproductprotection/*</path>
     </files>
     <objects>
+    <path>~/Objects/*</path>
+    <!-- 
        <path>~/Objects/Records/*</path>
               <path>~/Objects/Fields/*</path>
               <path>~/Objects/Searches/*</path>
+    -->
     </objects> 
     <translationimports>
         <path>~/Translations/*</path>

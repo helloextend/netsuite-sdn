@@ -86,7 +86,7 @@
     <scriptdeployment scriptid="customdeploy_ext_upsert_order_mr">
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
-      <custscript_ext_config_rec>[appid=com.extend.extendproductprotection, scriptid=customrecord_ext_configuration.val_400150_t2522354_422]</custscript_ext_config_rec>
+      <custscript_ext_config_rec></custscript_ext_config_rec>
       <custscript_ext_order_search>[scriptid=customsearch_ext_order_search]</custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
