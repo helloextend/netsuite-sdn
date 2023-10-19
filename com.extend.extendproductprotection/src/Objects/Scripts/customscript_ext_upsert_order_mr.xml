@@ -87,7 +87,7 @@
       <buffersize>1</buffersize>
       <concurrencylimit>1</concurrencylimit>
       <custscript_ext_config_rec></custscript_ext_config_rec>
-      <custscript_ext_order_search>[scriptid=customsearch_ext_order_search]</custscript_ext_order_search>
+      <custscript_ext_order_search></custscript_ext_order_search>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
       <queueallstagesatonce>T</queueallstagesatonce>
