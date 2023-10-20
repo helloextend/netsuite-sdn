@@ -41,7 +41,7 @@
             objExtendOrderRequestJSON = exports.buildExtendOrderJSON(objExtendData, objExtendConfig);
             log.audit('EXTEND UTIL _createExtendOrder: objExtendOrderRequestJSON', objExtendOrderRequestJSON);
             //call api
-            var objExtendResponse = EXTEND_API.upsertOrder(objExtendOrderRequestJSON, objExtendConfig);
+            var objExtendResponse = EXTEND_API.createOrder(objExtendOrderRequestJSON, objExtendConfig); //updated to rerun orders due to integration issue - changed from upsertOrder to createOrder
             log.audit('EXTEND UTIL _createExtendOrder: Extend Response Object: ', objExtendResponse);
             //handle response
             if (objExtendResponse.code === 201 || objExtendResponse.code === 200) {
@@ -66,7 +66,7 @@
                 var stNoteId = objNoteRecord.save();
             }
 
-            objSalesOrderRecord.save();
+          //  objSalesOrderRecord.save();
         };
         //refund item by line item transaction id
         exports.refundExtendOrder = function (objRefundData) {
@@ -457,7 +457,8 @@ log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k 
                     }
                 } else if (objValues[key].isShipping) {
                     var item = {
-                        "quoteId": objValues[key].quoteId,
+                    "isCreateQuote": true,//updated to rerun orders due to integration issue
+                        //"quoteId": objValues[key].quoteId,
                         'lineItemTransactionId': objValues[key].lineItemID,
                         "shipmentInfo": []
 //                        "shipmentInfo": objValues[key].shipmentInfo
@@ -475,7 +476,7 @@ log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k 
                             'purchasePrice': objValues[key].purchase_price
                         },
                         'quantity': objValues[key].quantity,
-                        'fulfilledQuantity': objValues[key].fulfilledQuantity,
+                        //'fulfilledQuantity': objValues[key].fulfilledQuantity,
                         'lineItemTransactionId': objValues[key].lineItemID
                     }
                     if (objValues[key].extend_plan_id && objValues[key].plan_price) {
@@ -536,7 +537,7 @@ log.debug('_getExtendData: i| stItemType |  ', i + ' | ' + stItemType + '|' + k 
                 'total': parseInt(objValues.total_amount * 100),
                 'shippingCostTotal': parseInt(objValues.shipping_total_amount * 100),
                 'taxCostTotal': parseInt(objValues.tax_total_amount * 100),
-                'transactionId': objValues.id,
+                'transactionId': "Oct2023-" + objValues.id, //updated to rerun orders due to integration issue
             }
 
             return objJSON;
