@@ -76,12 +76,17 @@ define([
             var intQuantityToRefund = parseInt(objRefundData['QTY']);
             var arrActiveIDs = objRefundData['activeIDs'];
             var arrCanceledIDs = objRefundData['canceledIDs'];
+            //VF 11/3 fix if multiple contracts to cancel, never initialize as an array
+            if(exports.stringIsEmpty(arrCanceledIDs)){
+                arrCanceledIDs= [];
+            }
             // var objLineToRefund = {'lineItemTransactionId' : objRefundData['lineItemTransactionId']}
             // var objContractToRefund = {'contractId' : objRefundData['lineItemTransactionId']}
 
             //check if contract id has been canceled
             function checkIfCanceled(contractToCancel, arrCanceledIDs) {
-                return arrCanceledIDs.length > 0 ? arrCanceledIDs.includes(contractToCancel) : false;
+               // log.debug('inside Check If Cancelled' + typeof arrCanceledIDs, arrCanceledIDs);
+                return arrCanceledIDs.length > 0 ? arrCanceledIDs.indexOf(contractToCancel) != -1 : false;
             }
 
             var intContractsCanceled = arrCanceledIDs ? arrCanceledIDs.length : 0;

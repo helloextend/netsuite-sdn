@@ -46,55 +46,56 @@
 
                 var stRefundId = context.key;
                 log.debug('reduce', 'stRefundId: ' + stRefundId);
+                //VF 11/3 - for RMA's with multiple lines, need to pass objRefundData per line
+                for(var i = 0; i < context.values.length; i++) {
+                    var objContextValues = JSON.parse(context.values[i]);
+                    log.debug('reduce', 'objContextValues: ' + JSON.stringify(objContextValues));
 
-                var objContextValues = JSON.parse(context.values[0]);
-                log.debug('reduce', 'objContextValues: ' + JSON.stringify(objContextValues));
+                    var stRefundType = objContextValues['recordType']
+                    log.debug('reduce', 'stRefundType: ' + stRefundType);
 
-                var stRefundType = objContextValues['recordType']
-                log.debug('reduce', 'stRefundType: ' + stRefundType);
+                    var stLineUniqueKey = objContextValues.values.lineuniquekey;
+                    log.debug('reduce', 'stLineUniqueKey: ' + stLineUniqueKey);
 
-                var stLineUniqueKey = objContextValues.values.lineuniquekey;
-                log.debug('reduce', 'stLineUniqueKey: ' + stLineUniqueKey);
+                    var stQuantityToRefund = objContextValues.values.quantity
+                    log.debug('reduce', 'stQuantityToRefund: ' + stQuantityToRefund);
 
-                var stQuantityToRefund = objContextValues.values.quantity
-                log.debug('reduce', 'stQuantityToRefund: ' + stQuantityToRefund);
-                
-                var stLineTranID = objContextValues.values.custcol_ext_line_id
-                log.debug('reduce', 'stLineTranID: ' + stLineTranID);
+                    var stLineTranID = objContextValues.values.custcol_ext_line_id
+                    log.debug('reduce', 'stLineTranID: ' + stLineTranID);
 
-                var arrActiveIDs = objContextValues.values.custcol_ext_contract_id;
-                log.debug('reduce', 'arrActiveIDs: ' + arrActiveIDs + " type - "+typeof arrActiveIDs);
-                arrActiveIDs = arrActiveIDs ? JSON.parse(arrActiveIDs) : [];
+                    var arrActiveIDs = objContextValues.values.custcol_ext_contract_id;
+                    log.debug('reduce', 'arrActiveIDs: ' + arrActiveIDs + " type - " + typeof arrActiveIDs);
+                    arrActiveIDs = arrActiveIDs ? JSON.parse(arrActiveIDs) : [];
 
-                var arrCanceledIDs = objContextValues.values.custcol_ext_canceled_contract_ids;
-                log.debug('reduce', 'arrCanceledIDs: ' + arrCanceledIDs + " type - "+typeof arrCanceledIDs);
-                arrCanceledIDs = arrCanceledIDs ? JSON.parse(arrCanceledIDs) : [];
+                    var arrCanceledIDs = objContextValues.values.custcol_ext_canceled_contract_ids;
+                    log.debug('reduce', 'arrCanceledIDs: ' + arrCanceledIDs + " type - " + typeof arrCanceledIDs);
+                    arrCanceledIDs = arrCanceledIDs ? JSON.parse(arrCanceledIDs) : [];
 
-                var objRefundData = {
-                    'ID' : stRefundId,
-                    'TYPE' : stRefundType,
-                    'UNIQUE_KEY' : stLineUniqueKey,
-                    'QTY' : stQuantityToRefund,
-                    'lineItemTransactionId' : stLineTranID,
-                    'activeIDs' : arrActiveIDs,
-                    'canceledIDs' : arrCanceledIDs
+                    var objRefundData = {
+                        'ID': stRefundId,
+                        'TYPE': stRefundType,
+                        'UNIQUE_KEY': stLineUniqueKey,
+                        'QTY': stQuantityToRefund,
+                        'lineItemTransactionId': stLineTranID,
+                        'activeIDs': arrActiveIDs,
+                        'canceledIDs': arrCanceledIDs
+                    }
+
+                    //call to refund by line item transaction id
+                    var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_record');
+                    var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
+                    objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundData, objExtendConfig);
+
+                    //Load associated Saled Order Record
+                    // var objRefundRecord = record.load({
+                    //     type: stRefundType,
+                    //     id: stRefundId
+                    // });
+
+                    // log.debug('reduce', 'objRefundRecord - '+ JSON.stringify(objRefundRecord));
+                    // Get Extend Details from Sales Order
+                    // objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundRecord);
                 }
-
-                //call to refund by line item transaction id
-                var stExtendConfigRecId = runtime.getCurrentScript().getParameter('custscript_ext_config_record');
-                var objExtendConfig = EXTEND_CONFIG.getConfig(stExtendConfigRecId);
-                objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundData, objExtendConfig);
-
-                //Load associated Saled Order Record
-                // var objRefundRecord = record.load({
-                //     type: stRefundType,
-                //     id: stRefundId
-                // });
-
-                // log.debug('reduce', 'objRefundRecord - '+ JSON.stringify(objRefundRecord));
-                // Get Extend Details from Sales Order
-                // objExtendData = EXTEND_UTIL.refundExtendOrder(objRefundRecord);
-
             } catch (e) {
                 log.error('reduce', 'key: ' + context.key + ' error: ' + e);
 
@@ -122,6 +123,8 @@
                 log.debug('reduce', 'stNoteId: ' + stNoteId);
 
             }
+
+
         }
 
         exports.summarize = function (summary) {
