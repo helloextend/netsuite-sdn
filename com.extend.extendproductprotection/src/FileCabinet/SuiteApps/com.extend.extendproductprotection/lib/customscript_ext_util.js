@@ -77,15 +77,15 @@ define([
             var arrActiveIDs = objRefundData['activeIDs'];
             var arrCanceledIDs = objRefundData['canceledIDs'];
             //VF 11/3 fix if multiple contracts to cancel, never initialize as an array
-            if(exports.stringIsEmpty(arrCanceledIDs)){
-                arrCanceledIDs= [];
+            if (exports.stringIsEmpty(arrCanceledIDs)) {
+                arrCanceledIDs = [];
             }
             // var objLineToRefund = {'lineItemTransactionId' : objRefundData['lineItemTransactionId']}
             // var objContractToRefund = {'contractId' : objRefundData['lineItemTransactionId']}
 
             //check if contract id has been canceled
             function checkIfCanceled(contractToCancel, arrCanceledIDs) {
-               // log.debug('inside Check If Cancelled' + typeof arrCanceledIDs, arrCanceledIDs);
+                // log.debug('inside Check If Cancelled' + typeof arrCanceledIDs, arrCanceledIDs);
                 return arrCanceledIDs.length > 0 ? arrCanceledIDs.indexOf(contractToCancel) != -1 : false;
             }
 
@@ -267,7 +267,7 @@ define([
             objExtendData.shipping_total_amount = objSalesOrderRecord.getValue({ fieldId: 'shippingcost' });
             objExtendData.tax_total_amount = objSalesOrderRecord.getValue({ fieldId: 'taxtotal' });
             objExtendData.name = objCustomerInfo.name;
-            if(exports.objectIsEmpty(objCustomerInfo.name)){
+            if (exports.objectIsEmpty(objCustomerInfo.name)) {
                 objExtendData.name = objCustomerInfo.altName;
             }
             //objExtendData.name = objSalesOrderRecord.getText({ fieldId: 'entity' }).replace(/[0-9]/g, ''); //update this
@@ -306,7 +306,7 @@ define([
                 //exclude discount
                 var stItemType = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: i });
                 log.debug('_getExtendData: stItemType ', stItemType + ' | ' + i);
-                if(stItemType == 'Discount'){
+                if (stItemType == 'Discount') {
                     continue;
                 }
                 if (!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)) {
@@ -340,6 +340,11 @@ define([
                         objExtendItemData[stUniqueKey].extend_plan_id = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_plan_id', line: i });
                         objExtendItemData[stUniqueKey].extend_line = "" + i;
                         objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
+          log.debug('price', objExtendItemData[stUniqueKey].plan_price);
+                        if (!objExtendItemData[stUniqueKey].plan_price) {
+                            parseInt(((objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i }) / objExtendItemData.quantity).toFixed(2)) * 100);
+                        }
+                        log.debug('price', objExtendItemData[stUniqueKey].plan_price);
                         //set Extend Line Item Transaction ID on Extend Line
                         objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
                     }
@@ -362,6 +367,11 @@ define([
                                 objExtendItemData[stUniqueKey].itemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_ext_associated_item', line: i });;
                                 objExtendItemData[stUniqueKey].extend_line = "" + i;
                                 objExtendItemData[stUniqueKey].plan_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
+                                log.debug('price', objExtendItemData[stUniqueKey].plan_price);
+                                if (!objExtendItemData[stUniqueKey].plan_price) {
+                                    parseInt(((objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i }) / objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i })).toFixed(2)) * 100);
+                                }
+                                log.debug('price', objExtendItemData[stUniqueKey].plan_price);
                                 //set Extend Line Item Transaction ID of related product on Extend Line
                                 objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
                                 var stRelatedItemID = "" + objSalesOrderRecord.id + "-" + j + "-" + i;
@@ -378,6 +388,11 @@ define([
                     objExtendItemData[stUniqueKey].itemId = stItemId
                     objExtendItemData[stUniqueKey].line = i;
                     objExtendItemData[stUniqueKey].purchase_price = parseInt(objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'rate', line: i }) * 100);
+                    log.debug('price', objExtendItemData[stUniqueKey].purchase_price);
+                    if (!objExtendItemData[stUniqueKey].purchase_price) {
+                        parseInt(((objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i }) / objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i })).toFixed(2)) * 100);
+                    }
+                    log.debug('price', objExtendItemData[stUniqueKey].purchase_price);
                     objExtendItemData[stUniqueKey].lineItemID = "" + objSalesOrderRecord.id + "-" + i;
                     if (objExtendItemData[stUniqueKey].extend_line) {
                         objExtendItemData[stUniqueKey].lineItemID = objExtendItemData[stUniqueKey].lineItemID + "-" + objExtendItemData[stUniqueKey].extend_line;
@@ -493,33 +508,33 @@ define([
         exports.buildExtendShipmentJSON = function (objValues) {
             var shipmentInfo = [];
             for (key in objValues) {
-            var objJSON = {
-                'lineItemTransactionId': objValues[key].lineItemID,
-                'productIds': objValues[key].prodcutIds,
-                'shipmentDate': objValues[key].lineItemID,
-                'shippingProvider': objValues[key].carrier,
-                'trackingId': objValues[key].trackingId,
-                'trackingUrl': objValues[key].trackingUrl,
-                'destination': {
-                    'address1': objValues[key].dest_address1,
-                    'address2': objValues[key].dest_address2,
-                    'city': objValues[key].dest_city,
-                    'postalCode': objValues[key].dest_zip,
-                    'countryCode': objValues[key].dest_country,
-                    'province': objValues[key].dest_state,
-                },
-                'source': {
-                    'address1': objValues[key].source_address1,
-                    'address2': objValues[key].source_address2,
-                    'city': objValues[key].source_city,
-                    'postalCode': objValues[key].source_zip,
-                    'countryCode': objValues[key].source_country,
-                    'province': objValues[key].source_state,
+                var objJSON = {
+                    'lineItemTransactionId': objValues[key].lineItemID,
+                    'productIds': objValues[key].prodcutIds,
+                    'shipmentDate': objValues[key].lineItemID,
+                    'shippingProvider': objValues[key].carrier,
+                    'trackingId': objValues[key].trackingId,
+                    'trackingUrl': objValues[key].trackingUrl,
+                    'destination': {
+                        'address1': objValues[key].dest_address1,
+                        'address2': objValues[key].dest_address2,
+                        'city': objValues[key].dest_city,
+                        'postalCode': objValues[key].dest_zip,
+                        'countryCode': objValues[key].dest_country,
+                        'province': objValues[key].dest_state,
+                    },
+                    'source': {
+                        'address1': objValues[key].source_address1,
+                        'address2': objValues[key].source_address2,
+                        'city': objValues[key].source_city,
+                        'postalCode': objValues[key].source_zip,
+                        'countryCode': objValues[key].source_country,
+                        'province': objValues[key].source_state,
+                    }
                 }
-            }
-            shipmentInfo.push(objJSON);
+                shipmentInfo.push(objJSON);
 
-        }
+            }
             return shipmentInfo;
         };
         /***********************************Support Functions********************************************/
@@ -567,12 +582,12 @@ define([
                     if (!stItemRefId) {
                         var stItemRefId = arrItemLookup[prop][0].text;
                     }
-        
+
                     var arrItemRefId = stItemRefId.split(": ");
-        
+
                     if (arrItemRefId.length > 1) {
                         stItemRefId = arrItemRefId[1]
-        
+
                     }
                     break;
                 }
@@ -597,7 +612,7 @@ define([
                 id: stCustomerId
             });
             var objCustomerInfo = {
-                "altName" : objCustomerRecord.getValue({ fieldId: 'altname' }),
+                "altName": objCustomerRecord.getValue({ fieldId: 'altname' }),
                 "name": objCustomerRecord.getValue({ fieldId: 'firstname' }) + ' ' + objCustomerRecord.getValue({ fieldId: 'lastname' }),
                 "email": objCustomerRecord.getValue({ fieldId: 'email' }),
                 "phone": objCustomerRecord.getValue({ fieldId: 'phone' }),
