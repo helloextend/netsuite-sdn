@@ -295,6 +295,8 @@ define([
             var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             log.debug('_getExtendData: stExtendShippingItemId ', stExtendShippingItemId);
 
+            let isGroup = false;
+
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
                 stUniqueKey = i;
@@ -373,8 +375,30 @@ define([
                 }
 
                 else {
+                    var intQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                    
+                    if (stItemType == 'Group') {
+                        isGroup = true;
+                        var groupStart = i;
+                    }
+
+                    if (stItemType == 'EndGroup') {
+                        isGroup = false;
+                    }
+
+                    if (isGroup == true) {
+                        if (i > groupStart) {
+                            continue;
+                        }
+                    }
+
+                    if (stringIsEmpty(intQuantity)) {
+                        log.debug('_getExtendData: Discount/Subtotal/etc item type continue', stItemType);
+                        continue;
+                    }
+                    
                     // Start building the Extend Order Item Info Object
-                    objExtendItemData[stUniqueKey].quantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                    objExtendItemData[stUniqueKey].quantity = intQuantity;
                     objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: i });
                     objExtendItemData[stUniqueKey].itemId = stItemId
                     objExtendItemData[stUniqueKey].line = i;
