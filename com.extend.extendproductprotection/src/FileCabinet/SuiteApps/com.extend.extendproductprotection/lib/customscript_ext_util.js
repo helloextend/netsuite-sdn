@@ -3,7 +3,7 @@
  *@description: Structures the various JSON request bodies to the Extend API
  * @NApiVersion 2.x
  */
-define([
+ define([
     'N/runtime',
     'N/search',
     'N/record',
@@ -295,7 +295,7 @@ define([
             var stExtendShippingItemId = objExtendConfig.shipping_plan_item;
             log.debug('_getExtendData: stExtendShippingItemId ', stExtendShippingItemId);
 
-            let isGroup = false;
+            var isGroup = false;
 
             for (var i = 0; i < stLineCount; i++) {
                 var stItemId = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
@@ -306,8 +306,33 @@ define([
                 if(stItemType == 'Discount'){
                     continue;
                 }
+
+                var intQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                
+                if (stItemType == 'Group') {
+                    isGroup = true;
+                    var groupStart = i;
+                }
+
+                if (stItemType == 'EndGroup') {
+                    isGroup = false;
+                }
+
+                if (isGroup == true) {
+                    if (i > groupStart) {
+                        continue;
+                    }
+                }
+
+                if (exports.stringIsEmpty(intQuantity)) {
+                    log.debug('_getExtendData: Discount/Subtotal/etc item type continue', stItemType);
+                    continue;
+                }
+              
                 if (!objExtendItemData[stUniqueKey] && (stExtendProductItemId !== stItemId)) {
+                  if(!isGroup) {
                     objExtendItemData[stUniqueKey] = {};
+                  }
                 }
                 //Check if item is one of the configured extend items
                 if (stExtendShippingItemId === stItemId) {
@@ -375,28 +400,7 @@ define([
                 }
 
                 else {
-                    var intQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-                    
-                    if (stItemType == 'Group') {
-                        isGroup = true;
-                        var groupStart = i;
-                    }
-
-                    if (stItemType == 'EndGroup') {
-                        isGroup = false;
-                    }
-
-                    if (isGroup == true) {
-                        if (i > groupStart) {
-                            continue;
-                        }
-                    }
-
-                    if (stringIsEmpty(intQuantity)) {
-                        log.debug('_getExtendData: Discount/Subtotal/etc item type continue', stItemType);
-                        continue;
-                    }
-                    
+                   if(!isGroup) {
                     // Start building the Extend Order Item Info Object
                     objExtendItemData[stUniqueKey].quantity = intQuantity;
                     objExtendItemData[stUniqueKey].fulfilledQuantity = objSalesOrderRecord.getSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled', line: i });
@@ -410,6 +414,9 @@ define([
                     if (objExtendItemData[stUniqueKey].extend_line) {
                         objExtendItemData[stUniqueKey].lineItemID = objExtendItemData[stUniqueKey].lineItemID + "-" + objExtendItemData[stUniqueKey].extend_line;
                     }
+                   }
+                    
+
                 }
 
             }
@@ -443,6 +450,7 @@ define([
                 else {
                     //get product refId
                     log.debug('_buildExtendItemJSON: objValues', objValues);
+                    log.debug('_buildExtendItemJSON: objValues[key].itemId ' + key, objValues[key].itemId);
                     objValues[key].refId = exports.getItemRefId(objValues[key].itemId, objExtendConfig);
                     var item = {
                         'product': {
