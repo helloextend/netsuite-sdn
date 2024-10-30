@@ -227,9 +227,22 @@
                     var arrContractIds = JSON.parse(stContractIds);
                     objExtendResponseData[key].contractIds.concat(arrContractIds);
                 }
+                
                 if (stLeadTokens) {
-                    var arrLeadTokens = JSON.parse(stLeadTokens);
-                    objExtendResponseData[key].leadTokens.concat(arrLeadTokens);
+                    var arrLeadTokens;
+
+                    try {
+                        arrLeadTokens = JSON.parse(stLeadTokens);
+                        // Check if it's an array or single string
+                        if (!Array.isArray(arrLeadTokens)) {
+                            arrLeadTokens = [arrLeadTokens]; // Wrap single string in an array
+                        }
+                    } catch (e) {
+                        // Handle case where parsing fails (may not be a JSON string)
+                        arrLeadTokens = [stLeadTokens]; // Assume it's a single token
+                    }
+
+                    objExtendResponseData[key].leadTokens = objExtendResponseData[key].leadTokens.concat(arrLeadTokens);
                 }
 
                 log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', objExtendResponseData[key].contractIds + '|' + objExtendResponseData[key].leadTokens + typeof objExtendResponseData[key].leadTokens);
