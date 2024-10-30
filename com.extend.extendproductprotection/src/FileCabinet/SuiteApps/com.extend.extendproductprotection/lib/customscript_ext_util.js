@@ -228,21 +228,31 @@
                     objExtendResponseData[key].contractIds.concat(arrContractIds);
                 }
                 
+                // Write lead tokens back to sales order
                 if (stLeadTokens) {
                     var arrLeadTokens;
 
                     try {
                         arrLeadTokens = JSON.parse(stLeadTokens);
-                        // Check if it's an array or single string
                         if (!Array.isArray(arrLeadTokens)) {
                             arrLeadTokens = [arrLeadTokens]; // Wrap single string in an array
                         }
                     } catch (e) {
-                        // Handle case where parsing fails (may not be a JSON string)
                         arrLeadTokens = [stLeadTokens]; // Assume it's a single token
                     }
 
-                    objExtendResponseData[key].leadTokens = objExtendResponseData[key].leadTokens.concat(arrLeadTokens);
+                    // Combine and remove duplicates
+                    var combinedTokens = objExtendResponseData[key].leadTokens.concat(arrLeadTokens);
+                    
+                    // Remove duplicates manually
+                    var uniqueTokens = [];
+                    for (var i = 0; i < combinedTokens.length; i++) {
+                        if (uniqueTokens.indexOf(combinedTokens[i]) === -1) {
+                            uniqueTokens.push(combinedTokens[i]);
+                        }
+                    }
+
+                    objExtendResponseData[key].leadTokens = uniqueTokens;
                 }
 
                 log.debug('EXTEND UTIL _createExtendOrder: newContractIds | stLeadTokens: ', objExtendResponseData[key].contractIds + '|' + objExtendResponseData[key].leadTokens + typeof objExtendResponseData[key].leadTokens);
